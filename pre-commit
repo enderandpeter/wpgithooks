@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Save the DB changes to a SQL file in the project's .db folder 
+# named after  the "deploy" value from the git config
+
+db_folder=.db
+example_config=$(cat << EOF
+####################################################################
+# An example git configuration for saving SQL for a site called "test":
+####################################################################
+[wp-site]
+	test = local.example.com
+	live = example.com
+	deploy = test
+EOF
+)
+# Create the SQL file for the Wordpress DB
+if [ ! -d "$db_folder" ]; then
+	echo "Could not find DB folder: $(pwd)/$db_folder"
+	echo "Creating database folder..."
+	if [ ! mkdir .db ]; then
+		echo "Could not create DB folder: $(pwd)/$db_folder"
+		exit 1
+	fi
+fi
+
+# The name of the SQL file helps to identify the site url that will be in it
+sitename=$(git config --get wp-site.deploy)
+
+if [ -z "$sitename" ]; then
+	cat << EOF
+Could not find name of site. Make sure there is a [wp-site] section in the
+git config that defines a "deploy" key and the available sites. 
+EOF
+	echo 
+	echo "$example_config"
+	exit 1
+fi
+
+# Clear out the DB folder
+echo "Clearing SQL files from $db_folder"
+rm $db_folder/*.sql
+
+savepath="$db_folder"/"$sitename".sql
+
+if ! wp db export "$savepath"; then
+	echo "There was an error saving to $savepath"
+	exit 1
+fi
+
+if [ ! -e "$savepath" ]; then
+	echo "Could not find $savepath"
+	exit 1
+fi
+
+if git add -A "$db_folder"; then
+	echo "Changes to $db_folder added to index"
+else
+	echo "Could not save $savepath to index"
+	exit 1
+fi
