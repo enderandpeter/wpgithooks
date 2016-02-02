@@ -61,7 +61,7 @@ fi
 
 echo "Replacing $oldurl with $newurl"
 
-if ! wp search-replace "//$oldurl" "//$newurl"; then
+if ! wp search-replace "//$oldurl" "//$newurl" --skip-columns=guid; then
 	echo "There was an error searching/replacing the WordPress database"
 	exit 1
 fi
