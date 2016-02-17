@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# Remake the WordPress database from the .db SQL file and replace
+# the URLs from the file with the value for the wp-site being deployed
+
+db_folder=.db
+example_config=$(cat << EOF
+####################################################################
+# An example git configuration for saving SQL for a site called "test":
+####################################################################
+[wp-site]
+	test = local.example.com
+	live = example.com
+	deploy = test
+EOF
+)
+# Confirm the existence of the database folder
+if [ ! -d "$db_folder" ]; then
+	echo "Could not find DB folder: $(pwd)/$db_folder"
+	exit 1
+fi
+
+# The name of the SQL file helps to identify the site url that will be in it
+sitename=$(git config --get wp-site.deploy)
+
+if [ -z "$sitename" ]; then
+	cat << EOF
+Could not find name of site. Make sure there is a [wp-site] section in the
+git config that defines a "deploy" key and the available sites. 
+EOF
+	echo ""
+	echo "$example_config"
+	exit 1
+fi
+
+savepath=$(ls "$db_folder"/*.sql | head -n 1)
+
+oldsite=$(basename "$savepath" .sql)
+newurl=$(git config --get wp-site."$sitename")
+oldurl=$(git config --get wp-site."$oldsite")
+
+if [ -z "$newurl" ] || [ -z "$oldurl" ]; then
+	cat << EOF
+Could not find replacement strings:
+
+oldurl = $oldurl
+newurl = $newurl
+
+Make sure there is a [wp-site] section in the
+git config that defines a "deploy" key and the available sites. 
+EOF
+	echo 
+	echo "$example_config"
+	exit 1	
+fi
+
+if ! wp db import "$savepath"; then
+	echo "There was an error restoring the database from $savepath"
+	exit 1
+fi
+
+echo "Replacing $oldurl with $newurl"
+
+if ! wp search-replace "//$oldurl" "//$newurl" --skip-columns=guid; then
+	echo "There was an error searching/replacing the WordPress database"
+	exit 1
+fi
