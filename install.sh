@@ -27,7 +27,7 @@ CORE_IS_INSTALLED="$CORE is-installed $WP_CLI_PATH_OPTION"
 CORE_DOWNLOAD="$CORE download $WP_CLI_PATH_OPTION"
 CORE_INSTALL="$CORE install $WP_CLI_PATH_OPTION"
  
-if [ ! "$CORE_IS_INSTALLED" ]; then
+if ! $CORE_IS_INSTALLED; then
     echo Installing WordPress in $WORDPRESS_DIR
     $CORE_DOWNLOAD
     $CORE_INSTALL    
@@ -70,7 +70,7 @@ for command in "${commandlist[@]}"; do
 done
 
 # Recreate .htaccess rules if httpd is detected
-if [ ! -z "$(type httpd)" ]; then
+if ! type httpd; then
     wp rewrite flush
 fi
 
