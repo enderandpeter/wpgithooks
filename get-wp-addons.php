@@ -2,7 +2,7 @@
 $addOnList = require 'wp-addons.php';
 
 $addOnType = $argv[1];
-$addOnAction = $argv[2];
+$addOnAction = isset($argv[2]) ? $argv[2] : '';
 
 $requestedList = [];
 /*
@@ -12,8 +12,10 @@ activate it if the addon was simply named, or interpret the toggle and version i
 ['addon', null, '1.0'] : Install version 1.0 of addon, but do not activate
 ['addon', false] : Install latest version of addon, but do not activate
 */
-if(!empty($addOnList[$addOnType][$addOnAction])){
-    $requestedList = $addOnList[$addOnType][$addOnAction];
+
+$requestedList = $addOnAction ? $addOnList[$addOnType][$addOnAction] : $addOnList[$addOnType];
+if(!empty($requestedList)){
+    
     foreach($requestedList as $key => $item){
         if(is_array($item)){
             if(!empty($item[0])){
@@ -27,7 +29,7 @@ if(!empty($addOnList[$addOnType][$addOnAction])){
             if(!empty($item[2])){
                 $requestedList[$key] .= " --version=${item[2]}";
             }
-        } else if($addOnAction !== 'delete' && $addOnAction !== 'uninstall'){
+        } else if($addOnAction === 'install'){
             $requestedList[$key] .= " --activate";
         }
     }
