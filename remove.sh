@@ -6,6 +6,7 @@ green='\e[0;32m'
 yellow='\e[0;33m'
 red='\e[0;31m'
 endColor='\e[0m'
+
 # Get absolute path of WordPress directory, which should
 # be folders folders up: /wp-content/uploads/.git/hooks
 WORDPRESS_DIR=../..
@@ -22,41 +23,11 @@ WORDPRESS_DIR=$(pwd)
 cd - >> /dev/null
 WP_CLI_PATH_OPTION=--path="$WORDPRESS_DIR"
 
-commandlist=('plugin install' 'theme install')
-
-# Download and install WordPress core files if they
-# are missing.
-
-CORE="wp core"
-
-CORE_IS_INSTALLED="$CORE is-installed $WP_CLI_PATH_OPTION"
-CORE_DOWNLOAD="$CORE download $WP_CLI_PATH_OPTION"
-CORE_INSTALL="$CORE install $WP_CLI_PATH_OPTION"
- 
-# If WordPress core is not installed, then download and install it.
-if ! $CORE_IS_INSTALLED; then
-    echo -e "$yellow"Installing WordPress in $WORDPRESS_DIR"$endColor";
-    $CORE_DOWNLOAD
-    $CORE_INSTALL
-fi
-
-echo -e "$green"WordPress installed in $WORDPRESS_DIR"$endColor"
-
-if [ ! -e $WORDPRESS_DIR/wp-config.php ]; then
-	echo -e "$yellow"Creating wp-config"$endColor"
-
-	config=$(IFS=$' \n\t';php -f .git/hooks/get-wp-addons.php config)
-
-	CONFIG_COMMAND="$CORE config $config $WP_CLI_PATH_OPTION"
-	if ! $CONFIG_COMMAND; then
-		echo -e "$red"Could not create wp-config"$endColor"
-		exit
-	fi
-fi
+commandlist=('plugin uninstall' 'theme delete')
 
 # Run each command for every plugin and theme returned
 # from get-wp-addons.php, if the addon is 
-echo -e "$yellow"Installing plugins and themes"$endColor"
+echo -e "$yellow"Removing plugins and themes"$endColor"
 for command in "${commandlist[@]}"; do
     plugins=$(IFS=$' \n\t';php -f .git/hooks/get-wp-addons.php $command)        
     IFS=$'\n'
@@ -89,9 +60,3 @@ for command in "${commandlist[@]}"; do
     done
 done
 IFS=$OLD_IFS
-
-# Recreate .htaccess rules if httpd is detected
-echo -e "$yellow"Recreating .htaccess rewrite rules"$endColor"
-if type httpd >> /dev/null; then
-    wp rewrite flush --hard $WP_CLI_PATH_OPTION
-fi

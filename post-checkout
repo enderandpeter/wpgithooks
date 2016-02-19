@@ -1,4 +1,26 @@
 #!/bin/bash
+OLD_IFS="$IFS"
+
+purple='\e[0;35m'
+green='\e[0;32m'
+yellow='\e[0;33m'
+red='\e[0;31m'
+endColor='\e[0m'
+# Get absolute path of WordPress directory, which should
+# be folders folders up: /wp-content/uploads/.git/hooks
+WORDPRESS_DIR=../..
+if [ ! -d "$WORDPRESS_DIR" ]; then
+    echo -n Please enter the path of the WordPress directory
+    read WORDPRESS_DIR
+    if [ ! -d "$WORDPRESS_DIR" ]; then
+        echo -e "$red"Could not find the directory: $WORDPRESS_DIR"$endColor"
+        exit
+    fi    
+fi
+cd $WORDPRESS_DIR
+WORDPRESS_DIR=$(pwd)
+cd - >> /dev/null
+WP_CLI_PATH_OPTION=--path="$WORDPRESS_DIR"
 
 # Download the core files if necessary
 .git/hooks/install.sh
@@ -69,3 +91,5 @@ if ! wp search-replace "//$oldurl" "//$newurl" --skip-columns=guid $WP_CLI_PATH_
 	echo "There was an error searching/replacing the WordPress database"
 	exit 1
 fi
+
+.git/hooks/remove.sh
