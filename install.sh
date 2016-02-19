@@ -1,6 +1,7 @@
 # #!/bin/bash
-commandlist=('plugin install' 'plugin uninstall' 'theme install' 'theme delete')
 OLD_IFS="$IFS"
+
+commandlist=('plugin install' 'plugin uninstall' 'theme install' 'theme delete')
 purple='\e[0;35m'
 green='\e[0;32m'
 yellow='\e[0;33m'
@@ -13,7 +14,7 @@ if [ ! -d "$WORDPRESS_DIR" ]; then
     echo -n Please enter the path of the WordPress directory
     read WORDPRESS_DIR
     if [ ! -d "$WORDPRESS_DIR" ]; then
-        echo Could not find the directory: $WORDPRESS_DIR
+        echo -e "$red"Could not find the directory: $WORDPRESS_DIR"$endColor"
         exit
     fi    
 fi
@@ -30,8 +31,9 @@ CORE_IS_INSTALLED="$CORE is-installed $WP_CLI_PATH_OPTION"
 CORE_DOWNLOAD="$CORE download $WP_CLI_PATH_OPTION"
 CORE_INSTALL="$CORE install $WP_CLI_PATH_OPTION"
  
-if ! $CORE_IS_INSTALLED; then # Output may not be supressed
-    echo -e "$yellow"Installing WordPress in $WORDPRESS_DIR"$endColor"; exit;
+# If WordPress core is not installed, then download and install it.
+if ! $CORE_IS_INSTALLED; then
+    echo -e "$yellow"Installing WordPress in $WORDPRESS_DIR"$endColor";
     $CORE_DOWNLOAD
     $CORE_INSTALL
 fi
@@ -39,7 +41,7 @@ fi
 echo -e "$green"WordPress installed in $WORDPRESS_DIR"$endColor"
 
 if [ ! -e $WORDPRESS_DIR/wp-config.php ]; then
-	echo -e "$green"Creating wp-config"$endColor"
+	echo -e "$yellow"Creating wp-config"$endColor"
 
 	config=$(IFS=$' \n\t';php -f .git/hooks/get-wp-addons.php config)
 
@@ -52,7 +54,7 @@ fi
 
 # Run each command for every plugin and theme returned
 # from get-wp-addons.php, if the addon is 
-echo -e "$green"Installing plugins and themes"$endColor"
+echo -e "$yellow"Installing plugins and themes"$endColor"
 for command in "${commandlist[@]}"; do
     plugins=$(IFS=$' \n\t';php -f .git/hooks/get-wp-addons.php $command)        
     IFS=$'\n'
@@ -86,8 +88,9 @@ for command in "${commandlist[@]}"; do
 done
 
 # Recreate .htaccess rules if httpd is detected
-if ! type httpd; then
-    wp rewrite flush
+echo -e "$yellow"Recreating .htaccess rewrite rules"$endColor"
+if type httpd >> /dev/null; then
+    wp rewrite flush --hard $WP_CLI_PATH_OPTION
 fi
 
 IFS=$OLD_IFS

@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # Download the core files if necessary
-#.git/hooks/install.sh
+.git/hooks/install.sh
 
 # Remake the WordPress database from the .db SQL file and replace
 # the URLs from the file with the value for the wp-site being deployed
 
+echo -e "$yellow"Restoring the database"$endColor"
 db_folder=.db
 example_config=$(cat << EOF
 ####################################################################
@@ -57,14 +58,14 @@ EOF
 	exit 1	
 fi
 
-if ! wp db import "$savepath"; then
+if ! wp db import "$savepath" $WP_CLI_PATH_OPTION; then
 	echo "There was an error restoring the database from $savepath"
 	exit 1
 fi
 
 echo "Replacing $oldurl with $newurl"
 
-if ! wp search-replace "//$oldurl" "//$newurl" --skip-columns=guid; then
+if ! wp search-replace "//$oldurl" "//$newurl" --skip-columns=guid $WP_CLI_PATH_OPTION; then
 	echo "There was an error searching/replacing the WordPress database"
 	exit 1
 fi

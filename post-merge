@@ -1,4 +1,6 @@
 #!/bin/bash
 
-# Setup the project if need be and import the database after merging
+# Call the post-checkout hook to install the core files if necessary
+# and import the DB.
+
 .git/hooks/post-checkout
