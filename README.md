@@ -22,6 +22,7 @@ These bash scripts are meant to be used in conjunction with [wp-cli](http://wp-c
 You may find it useful to create soft links from the scripts to your project directory. You can do so with the following:
 
 ### Windows
+    mklink \path\to\project\.git\hooks\post-merge \path\to\wpgithooks\post-checkout
     mklink \path\to\project\.git\hooks\post-merge \path\to\wpgithooks\post-merge
     mklink \path\to\project\.git\hooks\pre-commit \path\to\wpgithooks\pre-commit
     mklink \path\to\project\.git\hooks\install.sh \path\to\wpgithooks\install.sh
