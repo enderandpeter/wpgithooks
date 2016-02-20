@@ -3,6 +3,8 @@
 This is an example Plugin/Theme install manifest, which is simply a returned PHP array. Feel free to use the old-school
 array() function if your server does not support the newer syntax.
 
+Make sure this file is copied to /wp-content/uploads/wp-addons.php
+
 This script is called by get-wp-addons.php in install.sh, which are among the necessary scripts for the hooks that manage the 
 installation of your WordPress site from the uploads folder and database file.
 
