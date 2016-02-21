@@ -1,36 +1,22 @@
 #!/bin/bash
-OLD_IFS="$IFS"
+source .git/hooks/functions.sh
 
-purple='\e[0;35m'
-green='\e[0;32m'
-yellow='\e[0;33m'
-red='\e[0;31m'
-endColor='\e[0m'
-# Get absolute path of WordPress directory, which should
-# be folders folders up: /wp-content/uploads/.git/hooks
-WORDPRESS_DIR=../..
-if [ ! -d "$WORDPRESS_DIR" ]; then
-    echo -n Please enter the path of the WordPress directory
-    read WORDPRESS_DIR
-    if [ ! -d "$WORDPRESS_DIR" ]; then
-        echo -e "$red"Could not find the directory: $WORDPRESS_DIR"$endColor"
-        exit
-    fi    
-fi
-cd $WORDPRESS_DIR
-WORDPRESS_DIR=$(pwd)
-cd - >> /dev/null
-WP_CLI_PATH_OPTION=--path="$WORDPRESS_DIR"
+setColors
+getWPDir
 
 # Download the core files if necessary
-.git/hooks/install.sh
+if ! .git/hooks/install.sh; then
+    # IF there was a problem, exit with the last exit status
+    echo -e "$RED"Could not install WordPress site"$ENDCOLOR"
+    exit $?
+fi
 
 # Remake the WordPress database from the .db SQL file and replace
 # the URLs from the file with the value for the wp-site being deployed
 
-echo -e "$yellow"Restoring the database"$endColor"
-db_folder=.db
-example_config=$(cat << EOF
+echo -e "$YELLOW"Restoring the database"$ENDCOLOR"
+DB_FOLDER=.db
+EXAMPLE_CONFIG=$(cat << EOF
 ####################################################################
 # An example git configuration for saving SQL for a site called "test":
 ####################################################################
@@ -41,55 +27,61 @@ example_config=$(cat << EOF
 EOF
 )
 # Confirm the existence of the database folder
-if [ ! -d "$db_folder" ]; then
-	echo "Could not find DB folder: $(pwd)/$db_folder"
+if [ ! -d "$DB_FOLDER" ]; then
+	echo -e "$RED""Could not find DB folder: $(pwd)/$DB_FOLDER""$ENDCOLOR"
 	exit 1
 fi
 
 # The name of the SQL file helps to identify the site url that will be in it
-sitename=$(git config --get wp-site.deploy)
+SITENAME=$(git config --get wp-site.deploy)
 
-if [ -z "$sitename" ]; then
+if [ -z "$SITENAME" ]; then
 	cat << EOF
 Could not find name of site. Make sure there is a [wp-site] section in the
 git config that defines a "deploy" key and the available sites. 
 EOF
 	echo ""
-	echo "$example_config"
+	echo "$EXAMPLE_CONFIG"
 	exit 1
 fi
 
-savepath=$(ls "$db_folder"/*.sql | head -n 1)
+SAVEPATH=$(ls "$DB_FOLDER"/*.sql | head -n 1)
 
-oldsite=$(basename "$savepath" .sql)
-newurl=$(git config --get wp-site."$sitename")
-oldurl=$(git config --get wp-site."$oldsite")
+OLDSITE=$(basename "$SAVEPATH" .sql)
+NEWURL=$(git config --get wp-site."$SITENAME")
+OLDURL=$(git config --get wp-site."$OLDSITE")
 
-if [ -z "$newurl" ] || [ -z "$oldurl" ]; then
+if [ -z "$NEWURL" ] || [ -z "$OLDURL" ]; then
 	cat << EOF
-Could not find replacement strings:
+Could not find replacement strings in this project's git config:
 
-oldurl = $oldurl
-newurl = $newurl
+OLDSITE = $OLDURL
+SITENAME = $NEWURL
 
 Make sure there is a [wp-site] section in the
 git config that defines a "deploy" key and the available sites. 
 EOF
 	echo 
-	echo "$example_config"
+	echo "$EXAMPLE_CONFIG"
 	exit 1	
 fi
 
-if ! wp db import "$savepath" $WP_CLI_PATH_OPTION; then
-	echo "There was an error restoring the database from $savepath"
-	exit 1
+if ! wp db import "$SAVEPATH" $WP_CLI_PATH_OPTION; then
+	echo -e "$RED""There was an error restoring the database from $SAVEPATH""$ENDCOLOR"
+	exit $?
 fi
 
-echo "Replacing $oldurl with $newurl"
+echo "Replacing $OLDURL with $NEWURL"
 
-if ! wp search-replace "//$oldurl" "//$newurl" --skip-columns=guid $WP_CLI_PATH_OPTION; then
-	echo "There was an error searching/replacing the WordPress database"
-	exit 1
+if ! wp search-replace "//$OLDURL" "//$NEWURL" --skip-columns=guid $WP_CLI_PATH_OPTION; then
+	echo -e "$RED""There was an error searching/replacing the WordPress database""$ENDCOLOR"
+	exit $?
 fi
 
-.git/hooks/remove.sh
+if ! .git/hooks/remove.sh; then
+    echo -e "$RED""There was an error removing themes/plugins""$ENDCOLOR"
+	exit $?
+fi
+
+echo
+echo -e "$GREEN""WordPress site installation complete!""$ENDCOLOR"

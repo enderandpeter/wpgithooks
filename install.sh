@@ -1,26 +1,10 @@
 #!/bin/bash
 OLD_IFS="$IFS"
 
-purple='\e[0;35m'
-green='\e[0;32m'
-yellow='\e[0;33m'
-red='\e[0;31m'
-endColor='\e[0m'
-# Get absolute path of WordPress directory, which should
-# be folders folders up: /wp-content/uploads/.git/hooks
-WORDPRESS_DIR=../..
-if [ ! -d "$WORDPRESS_DIR" ]; then
-    echo -n Please enter the path of the WordPress directory
-    read WORDPRESS_DIR
-    if [ ! -d "$WORDPRESS_DIR" ]; then
-        echo -e "$red"Could not find the directory: $WORDPRESS_DIR"$endColor"
-        exit
-    fi    
-fi
-cd $WORDPRESS_DIR
-WORDPRESS_DIR=$(pwd)
-cd - >> /dev/null
-WP_CLI_PATH_OPTION=--path="$WORDPRESS_DIR"
+source .git/hooks/functions.sh
+
+setColors
+getWPDir
 
 commandlist=('plugin install' 'theme install')
 
@@ -35,28 +19,42 @@ CORE_INSTALL="$CORE install $WP_CLI_PATH_OPTION"
  
 # If WordPress core is not installed, then download and install it.
 if ! $CORE_IS_INSTALLED; then
-    echo -e "$yellow"Installing WordPress in $WORDPRESS_DIR"$endColor";
+    echo -e "$YELLOW"Installing WordPress in $WORDPRESS_DIR"$ENDCOLOR";
     $CORE_DOWNLOAD
     $CORE_INSTALL
 fi
 
-echo -e "$green"WordPress installed in $WORDPRESS_DIR"$endColor"
+echo -e "$GREEN"WordPress installed in $WORDPRESS_DIR"$ENDCOLOR"
 
-if [ ! -e $WORDPRESS_DIR/wp-config.php ]; then
-	echo -e "$yellow"Creating wp-config"$endColor"
+if [ ! -e "$WORDPRESS_DIR/wp-config.php" ]; then
+	echo -e "$YELLOW"Creating wp-config"$ENDCOLOR"
 
 	config=$(IFS=$' \n\t';php -f .git/hooks/get-wp-addons.php config)
 
 	CONFIG_COMMAND="$CORE config $config $WP_CLI_PATH_OPTION"
 	if ! $CONFIG_COMMAND; then
-		echo -e "$red"Could not create wp-config"$endColor"
-		exit
+		echo -e "$RED"Could not create wp-config"$ENDCOLOR"
+		exit 1
 	fi
+fi
+
+# Set the wp-addons.php file if there is not one already
+if [ ! -e "$WORDPRESS_UPLOADS_DIR/wp-addons.php" ]; then
+    EXAMPLE_ADDONS="$WORDPRESS_UPLOADS_DIR/wp-addons.example.php"
+    if [ ! -e "$EXAMPLE_ADDONS" ]; then
+        echo -e "$RED"Please add a wp-addons.example.php or wp-addons.php to your WordPress uploads repo"$ENDCOLOR"
+        exit 1
+    fi
+    
+    if ! cp "$EXAMPLE_ADDONS" "$WORDPRESS_UPLOADS_DIR"/wp-addons.php; then
+        echo -e "$RED"Could not copy addons config from "$EXAMPLE_ADDONS" to "$WORDPRESS_UPLOADS_DIR"/wp-addons.php"$ENDCOLOR"
+        exit 1
+    fi
 fi
 
 # Run each command for every plugin and theme returned
 # from get-wp-addons.php, if the addon is 
-echo -e "$yellow"Installing plugins and themes"$endColor"
+echo -e "$YELLOW"Installing plugins and themes"$ENDCOLOR"
 for command in "${commandlist[@]}"; do
     plugins=$(IFS=$' \n\t';php -f .git/hooks/get-wp-addons.php $command)        
     IFS=$'\n'
@@ -65,11 +63,11 @@ for command in "${commandlist[@]}"; do
         ADDON_NAME=$(echo $plugin | cut -d ' ' -f 1)
         COMMAND_TYPE=$(echo $command | cut -d ' ' -f 2)
 		ADDON_COMMAND="wp $command $plugin $WP_CLI_PATH_OPTION"
-        echo -e $purple$ADDON_COMMAND$endColor
+        echo -e $PURPLE$ADDON_COMMAND$ENDCOLOR
         IFS=$' '
         if [ "$COMMAND_TYPE" == "install" ] && ! wp $ADDON_TYPE is-installed $ADDON_NAME $WP_CLI_PATH_OPTION; then
             if ! $ADDON_COMMAND; then
-                echo -e "$purple"There was an error running:"$endColor" $command $plugin
+                echo -e "$PURPLE"There was an error running:"$ENDCOLOR" $command $plugin
             fi        
         else
             if [ "$COMMAND_TYPE" == "install" ]; then
@@ -79,7 +77,7 @@ for command in "${commandlist[@]}"; do
         
         if [ "$COMMAND_TYPE" != "install" ] && wp $ADDON_TYPE is-installed $ADDON_NAME $WP_CLI_PATH_OPTION; then
             if ! $ADDON_COMMAND; then
-                echo -e "$purple"There was an error running:"$endColor" $command $plugin
+                echo -e "$PURPLE"There was an error running:"$ENDCOLOR" $command $plugin
             fi 
         else
             if [ "$COMMAND_TYPE" != "install" ]; then
@@ -91,7 +89,7 @@ done
 IFS=$OLD_IFS
 
 # Recreate .htaccess rules if httpd is detected
-echo -e "$yellow"Recreating .htaccess rewrite rules"$endColor"
+echo -e "$YELLOW"Recreating .htaccess rewrite rules"$ENDCOLOR"
 if type httpd >> /dev/null; then
     wp rewrite flush --hard $WP_CLI_PATH_OPTION
 fi
