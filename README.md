@@ -49,3 +49,6 @@ You may find it useful to create soft links from the scripts to your project dir
 ### Linux/OS X
     ln -s /path/to/wpgithooks/{get-wp-addons.php,p*,install.sh,functions.sh} /path/to/project/.git/hooks    
     cp /path/to/wpgithooks/{wp-addons.example.php,wp-cli.yml} /path/to/project
+
+## Bugs
+* Does not work with multisite
