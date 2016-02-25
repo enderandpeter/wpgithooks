@@ -83,5 +83,14 @@ if ! .git/hooks/remove.sh; then
 	exit $?
 fi
 
+if [ -e ./cleanup.sh ]; then
+    if ! ./cleanup.sh; then
+        echo -e "$RED""There was an error running cleanup.sh""$ENDCOLOR"
+        exit $?
+    fi
+    echo -e "$GREEN"Cleanup Script complete."$ENDCOLOR"
+    echo
+fi
+
 echo
 echo -e "$GREEN""WordPress site installation complete!""$ENDCOLOR"

@@ -18,7 +18,7 @@ CORE_DOWNLOAD="$CORE download $WP_CLI_PATH_OPTION"
 CORE_INSTALL="$CORE install $WP_CLI_PATH_OPTION"
  
 # If WordPress core is not installed, then download and install it.
-if ! $CORE_IS_INSTALLED; then
+if ! $CORE_IS_INSTALLED >> /dev/null; then
     echo -e "$YELLOW"Installing WordPress in $WORDPRESS_DIR"$ENDCOLOR";
     $CORE_DOWNLOAD
     $CORE_INSTALL
@@ -26,7 +26,7 @@ fi
 
 echo -e "$GREEN"WordPress installed in $WORDPRESS_DIR"$ENDCOLOR"
 
-if [ ! -e "$WORDPRESS_DIR/wp-config.php" ]; then
+if [ ! -e "$WORDPRESS_DIR"/wp-config.php ]; then
 	echo -e "$YELLOW"Creating wp-config"$ENDCOLOR"
 
 	config=$(IFS=$' \n\t';php -f .git/hooks/get-wp-addons.php config)
@@ -39,10 +39,10 @@ if [ ! -e "$WORDPRESS_DIR/wp-config.php" ]; then
 fi
 
 # Set the wp-addons.php file if there is not one already
-if [ ! -e "$WORDPRESS_UPLOADS_DIR/wp-addons.php" ]; then
-    EXAMPLE_ADDONS="$WORDPRESS_UPLOADS_DIR/wp-addons.example.php"
+if [ ! -e "$WORDPRESS_UPLOADS_DIR"/wp-addons.php ]; then
+    EXAMPLE_ADDONS="$WORDPRESS_UPLOADS_DIR"/wp-addons.example.php
     if [ ! -e "$EXAMPLE_ADDONS" ]; then
-        echo -e "$RED"Please add a wp-addons.example.php or wp-addons.php to your WordPress uploads repo"$ENDCOLOR"
+        echo -e "$RED"Please add a wp-addons.example.php to your uploads repo or a wp-addons.php to your uploads working directory"$ENDCOLOR"
         exit 1
     fi
     
