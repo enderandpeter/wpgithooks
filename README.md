@@ -1,6 +1,6 @@
 # Git Hooks for Developing WordPress Sites
 
-These bash scripts are meant to be used in conjunction with [wp-cli](http://wp-cli.org/) and [some WordPress Git hooks](https://github.com/enderandpeter/wpgithooks) to automate saving your WordPress database as a SQL file to a folder called `.db` in the root of your project, providing version control for the state of your database that can be checked out along with any other changes in the project. The hooks read data from the git config section named wp-site that contains keys named after sites and values for the URL of the site. There is also an install.sh script that reads from a wp-addons.php configuration array in the WordPress site's uploads folder, which is where your repo should be based. The wp-addons.example.php file is an example configuration with instructions.
+These bash scripts are meant to be used in conjunction with [wp-cli](http://wp-cli.org/) and [some WordPress Git hooks](https://github.com/enderandpeter/wpgithooks) to automate saving your WordPress database as a SQL file to a folder called `.db` in the root of your project, which is the `uploads` folder of your WordPress site, typically in `wp-content/uploads`. providing version control for the state of your database that can be checked out along with any other changes in the project. The hooks read data from the git config section named wp-site that contains keys named after sites and values for the URL of the site. There is also an install.sh script that reads from a wp-addons.php configuration array in the WordPress site's uploads folder, which is where your repo should be based. The wp-addons.example.php file is an example configuration with instructions.
 
 ### Example
 		####################################################################
@@ -32,6 +32,8 @@ in the main project if that file does not already exist.
 
 `wp-cli.yml` is a configuration file for WP-CLI that makes sure the .htaccess file is actually recreated.
 
+You can also provide a `cleanup.sh` in your uploads folder that is run at the end of the hooks, after themes and plugins have been removed.
+
 ## Linking to project
 You may find it useful to create soft links from the scripts to your project directory. You can do so with the following:
 
@@ -50,5 +52,13 @@ You may find it useful to create soft links from the scripts to your project dir
     ln -s /path/to/wpgithooks/{get-wp-addons.php,p*,install.sh,functions.sh} /path/to/project/.git/hooks    
     cp /path/to/wpgithooks/{wp-addons.example.php,wp-cli.yml} /path/to/project
 
+## How to Use
+
+After you have either copied or symlinked the above files to the required directories and setup your `wp-addons.php` and optional `cleanup.sh`, you will be able
+to install all the core, plugin and theme files for your WordPress site. The hook scripts will also restore your database from the SQL file in your `uploads` folder's
+`.db` directory. This SQL file should be named after a site defined in the `wp-site` section of your local repo's `.git/config` file.
+
+If restoring a multisite install, you will need to preload the multisite `wp-config.php` into the `wp-content` folder of your site before running the hooks and rename the `DOMAIN_CURRENT_SITE` constant in `wp-config.php` to your current environment's domain name after running the hooks, or set this to happen automatically in `cleanup.sh`.
+    
 ## Bugs
-* Does not work with multisite
+* pre-commit hook may error when removing .SQL from previous environment
