@@ -58,7 +58,7 @@ After you have either copied or symlinked the above files to the required direct
 to install all the core, plugin and theme files for your WordPress site. The hook scripts will also restore your database from the SQL file in your `uploads` folder's
 `.db` directory. This SQL file should be named after a site defined in the `wp-site` section of your local repo's `.git/config` file.
 
-If restoring a multisite install, you will need to preload the multisite `wp-config.php` into the `wp-content` folder of your site before running the hooks and rename the `DOMAIN_CURRENT_SITE` constant in `wp-config.php` to your current environment's domain name after running the hooks, or set this to happen automatically in `cleanup.sh`.
+If restoring a multisite install, you will need to provide a [`wp-config.php`](https://codex.wordpress.org/Create_A_Network#Step_4:_Enabling_the_Network) and the [`.htaccess`](https://codex.wordpress.org/Multisite_Network_Administration#.htaccess_and_Mod_Rewrite) rules. Also, remember to rename the `DOMAIN_CURRENT_SITE` constant in `wp-config.php` to your current environment's domain name after running the hooks, or you can provide instructions to do this in `cleanup.sh`.
     
 ## Bugs
-* pre-commit hook may error when removing .SQL from previous environment
+* pre-commit hook may error when replacing .SQL from previous environment
