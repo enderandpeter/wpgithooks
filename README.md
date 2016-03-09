@@ -35,7 +35,7 @@ in the main project if that file does not already exist.
 You can also provide a `cleanup.sh` in your uploads folder that is run at the end of the hooks, after themes and plugins have been removed.
 
 ## Linking to project
-You may find it useful to create soft links from the scripts to your project directory. You can do so with the following:
+You may find it useful to create soft links from the scripts to your project's hooks directory, whereas some files should be copied to your project's `.setup` directory. You can do so with the following:
 
 ### Windows
     mklink \path\to\wp-content\uploads\.git\hooks\get-wp-addons.php \path\to\wpgithooks\get-wp-addons.php
@@ -45,12 +45,15 @@ You may find it useful to create soft links from the scripts to your project dir
     mklink \path\to\wp-content\uploads\wp-content\uploads\.git\hooks\pre-commit \path\to\wpgithooks\pre-commit
     mklink \path\to\wp-content\uploads\wp-content\uploads\.git\hooks\post-merge \path\to\wpgithooks\post-merge
     mklink \path\to\wp-content\uploads\wp-content\uploads\.git\hooks\post-checkout \path\to\wpgithooks\post-checkout
-    copy \path\to\wpgithooks\wp-addons.example.php \path\to\project\wp-addons.php
-    copy \path\to\wpgithooks\wp-cli.yml \path\to\project\
+    copy \path\to\wpgithooks\wp-addons.example.php \path\to\project\.setup\wp-addons.php
+    copy \path\to\wpgithooks\cleanup.example.sh \path\to\project\.setup\cleanup.sh
+    copy \path\to\wpgithooks\wp-cli.yml \path\to\project\.setup
 
 ### Linux/OS X
     ln -s /path/to/wpgithooks/{get-wp-addons.php,p*,install.sh,functions.sh} /path/to/project/.git/hooks    
-    cp /path/to/wpgithooks/{wp-addons.example.php,wp-cli.yml} /path/to/project
+    cp /path/to/wpgithooks/wp-cli.yml /path/to/project
+    cp /path/to/wpgithooks/wp-addons.example.php /path/to/project/.setup/wp-addons.php
+    cp /path/to/wpgithooks/cleanup.example.sh /path/to/project/.setup/cleanup.sh
 
 ## How to Use
 
@@ -62,3 +65,4 @@ If restoring a multisite install, you will need to provide a [`wp-config.php`](h
     
 ## Bugs
 * pre-commit hook may error when replacing .SQL from previous environment
+* Deleted plugins may not be properly disabled in the database, resulting in a message in the plugin screen reporting the completion of their removal.

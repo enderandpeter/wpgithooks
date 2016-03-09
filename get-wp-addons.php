@@ -1,5 +1,5 @@
 <?php
-$addOnList = require 'wp-addons.php';
+$addOnList = require '.setup/wp-addons.php';
 
 $addOnType = $argv[1];
 $addOnAction = isset($argv[2]) ? $argv[2] : '';

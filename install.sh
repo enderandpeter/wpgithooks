@@ -15,7 +15,7 @@ CORE="wp core"
 
 CORE_IS_INSTALLED="$CORE is-installed $WP_CLI_PATH_OPTION"
 CORE_DOWNLOAD="$CORE download $WP_CLI_PATH_OPTION"
-CORE_INSTALL="$CORE install $WP_CLI_PATH_OPTION"
+CORE_INSTALL="$CORE install --quiet $WP_CLI_PATH_OPTION"
  
 # If WordPress core is not installed, then download and install it.
 if ! $CORE_IS_INSTALLED >> /dev/null; then
@@ -39,15 +39,15 @@ if [ ! -e "$WORDPRESS_DIR"/wp-config.php ]; then
 fi
 
 # Set the wp-addons.php file if there is not one already
-if [ ! -e "$WORDPRESS_UPLOADS_DIR"/wp-addons.php ]; then
-    EXAMPLE_ADDONS="$WORDPRESS_UPLOADS_DIR"/wp-addons.example.php
+if [ ! -e "$WORDPRESS_SETUP_DIR"/wp-addons.php ]; then
+    EXAMPLE_ADDONS="$WORDPRESS_SETUP_DIR"/wp-addons.example.php
     if [ ! -e "$EXAMPLE_ADDONS" ]; then
         echo -e "$RED"Please add a wp-addons.example.php to your uploads repo or a wp-addons.php to your uploads working directory"$ENDCOLOR"
         exit 1
     fi
     
-    if ! cp "$EXAMPLE_ADDONS" "$WORDPRESS_UPLOADS_DIR"/wp-addons.php; then
-        echo -e "$RED"Could not copy addons config from "$EXAMPLE_ADDONS" to "$WORDPRESS_UPLOADS_DIR"/wp-addons.php"$ENDCOLOR"
+    if ! cp "$EXAMPLE_ADDONS" "$WORDPRESS_SETUP_DIR"/wp-addons.php; then
+        echo -e "$RED"Could not copy addons config from "$EXAMPLE_ADDONS" to "$WORDPRESS_SETUP_DIR"/wp-addons.php"$ENDCOLOR"
         exit 1
     fi
 fi
@@ -90,6 +90,6 @@ IFS=$OLD_IFS
 
 # Recreate .htaccess rules if httpd is detected
 echo -e "$YELLOW"Recreating .htaccess rewrite rules"$ENDCOLOR"
-if type httpd >> /dev/null; then
-    wp rewrite flush --hard $WP_CLI_PATH_OPTION
+if type httpd >> /dev/null; then    
+    WP_CLI_CONFIG_PATH=$WORDPRESS_SETUP_DIR/wp-cli.yml wp rewrite flush --hard $WP_CLI_PATH_OPTION
 fi

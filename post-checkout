@@ -1,6 +1,8 @@
 #!/bin/bash
 source .git/hooks/functions.sh
 
+CLEANUP_SCRIPT=.setup/cleanup.sh
+
 setColors
 getWPDir
 
@@ -83,13 +85,19 @@ if ! .git/hooks/remove.sh; then
 	exit $?
 fi
 
-if [ -e ./cleanup.sh ]; then
-    if ! ./cleanup.sh; then
+if [ -e "$CLEANUP_SCRIPT" ]; then
+    if ! "$CLEANUP_SCRIPT"; then
         echo -e "$RED""There was an error running cleanup.sh""$ENDCOLOR"
         exit $?
     fi
     echo -e "$GREEN"Cleanup Script complete."$ENDCOLOR"
     echo
+else
+    if [ ! -e "$WORDPRESS_SETUP_DIR"/cleanup.example.sh ]; then
+        cp .git/hooks/cleanup.example.sh .
+    fi
+    
+    echo -e "$YELLOW"To use the cleanup script, copy cleanup.example.sh to cleanup.sh in your project folder"$ENDCOLOR"
 fi
 
 echo
