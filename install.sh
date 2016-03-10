@@ -5,6 +5,7 @@ source .git/hooks/functions.sh
 
 setColors
 getWPDir
+getMultisite
 
 commandlist=('plugin install' 'theme install')
 
@@ -27,15 +28,20 @@ fi
 echo -e "$GREEN"WordPress installed in $WORDPRESS_DIR"$ENDCOLOR"
 
 if [ ! -e "$WORDPRESS_DIR"/wp-config.php ]; then
-	echo -e "$YELLOW"Creating wp-config"$ENDCOLOR"
+    if [ $IS_MULTISITE ]; then    
+        echo -e "$RED"You must provide a wp-config.php if setting up multisite"$ENDCOLOR"
+        exit 1
+    else
+        echo -e "$YELLOW"Creating wp-config"$ENDCOLOR"
 
-	config=$(IFS=$' \n\t';php -f .git/hooks/get-wp-addons.php config)
+        config=$(IFS=$' \n\t';php -f .git/hooks/get-wp-addons.php config)
 
-	CONFIG_COMMAND="$CORE config $config $WP_CLI_PATH_OPTION"
-	if ! $CONFIG_COMMAND; then
-		echo -e "$RED"Could not create wp-config"$ENDCOLOR"
-		exit 1
-	fi
+        CONFIG_COMMAND="$CORE config $config $WP_CLI_PATH_OPTION"
+        if ! $CONFIG_COMMAND; then
+            echo -e "$RED"Could not create wp-config"$ENDCOLOR"
+            exit 1
+        fi
+    fi
 fi
 
 # Set the wp-addons.php file if there is not one already

@@ -5,6 +5,7 @@ CLEANUP_SCRIPT=.setup/cleanup.sh
 
 setColors
 getWPDir
+getMultisite
 
 # Download the core files if necessary
 if ! .git/hooks/install.sh; then
@@ -13,60 +14,9 @@ if ! .git/hooks/install.sh; then
     exit $?
 fi
 
-# Remake the WordPress database from the .db SQL file and replace
-# the URLs from the file with the value for the wp-site being deployed
+getSiteNames
 
 echo -e "$YELLOW"Restoring the database"$ENDCOLOR"
-DB_FOLDER=.db
-EXAMPLE_CONFIG=$(cat << EOF
-####################################################################
-# An example git configuration for saving SQL for a site called "test":
-####################################################################
-[wp-site]
-	test = local.example.com
-	live = example.com
-	deploy = test
-EOF
-)
-# Confirm the existence of the database folder
-if [ ! -d "$DB_FOLDER" ]; then
-	echo -e "$RED""Could not find DB folder: $(pwd)/$DB_FOLDER""$ENDCOLOR"
-	exit 1
-fi
-
-# The name of the SQL file helps to identify the site url that will be in it
-SITENAME=$(git config --get wp-site.deploy)
-
-if [ -z "$SITENAME" ]; then
-	cat << EOF
-Could not find name of site. Make sure there is a [wp-site] section in the
-git config that defines a "deploy" key and the available sites. 
-EOF
-	echo ""
-	echo "$EXAMPLE_CONFIG"
-	exit 1
-fi
-
-SAVEPATH=$(ls "$DB_FOLDER"/*.sql | head -n 1)
-
-OLDSITE=$(basename "$SAVEPATH" .sql)
-NEWURL=$(git config --get wp-site."$SITENAME")
-OLDURL=$(git config --get wp-site."$OLDSITE")
-
-if [ -z "$NEWURL" ] || [ -z "$OLDURL" ]; then
-	cat << EOF
-Could not find replacement strings in this project's git config:
-
-OLDSITE = $OLDURL
-SITENAME = $NEWURL
-
-Make sure there is a [wp-site] section in the
-git config that defines a "deploy" key and the available sites. 
-EOF
-	echo 
-	echo "$EXAMPLE_CONFIG"
-	exit 1	
-fi
 
 if ! wp db import "$SAVEPATH" $WP_CLI_PATH_OPTION; then
 	echo -e "$RED""There was an error restoring the database from $SAVEPATH""$ENDCOLOR"
@@ -75,9 +25,18 @@ fi
 
 echo "Replacing $OLDURL with $NEWURL"
 
-if ! wp search-replace "//$OLDURL" "//$NEWURL" --skip-columns=guid $WP_CLI_PATH_OPTION; then
+if [ $IS_MULTISITE ]; then
+    sed -i "s/$NEWURL/$OLDURL/" "$WORDPRESS_DIR"/wp-config.php
+    $NETWORK=--network
+fi
+
+if ! wp search-replace "$OLDURL" "$NEWURL" $NETWORK --skip-columns=guid "$WP_CLI_PATH_OPTION"; then
 	echo -e "$RED""There was an error searching/replacing the WordPress database""$ENDCOLOR"
 	exit $?
+fi
+
+if [ $IS_MULTISITE ]; then
+    sed -i "s/$OLDURL/$NEWURL/" "$WORDPRESS_DIR"/wp-config.php
 fi
 
 if ! .git/hooks/remove.sh; then
