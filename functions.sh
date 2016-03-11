@@ -66,7 +66,7 @@ EOF
         exit 1
     fi
 
-    SAVEPATH=$(ls "$DB_FOLDER"/*.sql | head -n 1)
+    SAVEPATH="$(ls "$DB_FOLDER"/*.sql | head -n 1)"
 
     OLDSITE=$(basename "$SAVEPATH" .sql)
     NEWURL=$(git config --get wp-site."$SITENAME")
@@ -89,6 +89,7 @@ EOF
 }
 
 getMultisite() {
-    [ ! -z "$(sed -n "/define(\('\|\"\)MULTISITE/p" "$WORDPRESS_DIR"/wp-config.php)" ]
-    IS_MULTISITE=$?
+    if [ ! -z "$(sed -n "/^define(\('\|\"\)MULTISITE/p" "$WORDPRESS_DIR"/wp-config.php)" ]; then
+        IS_MULTISITE=true
+    fi
 }
