@@ -83,6 +83,8 @@ You may find it useful to create soft links from the scripts to your project's `
 
 After you have either copied or symlinked the above files to the required directories and setup your `wp-addons.php` and optional `cleanup.sh`, the installation of all the core files, plugins, themes, database and running of custom cleanup commands will all happen when a commit is checked out or merged into your `uploads` repo. You can work on the site, make changes to the site content, commit them, and rest assured that cloning the site content elsewhere will recreate everything that the WordPress web application requires.
 
+You can also start the installation and DB restoration process manually by running the `post-checkout` script.
+
 If restoring a multisite install, you will need to provide a [`wp-config.php`](https://codex.wordpress.org/Create_A_Network#Step_4:_Enabling_the_Network) and the [`.htaccess`](https://codex.wordpress.org/Multisite_Network_Administration#.htaccess_and_Mod_Rewrite) rules if using Apache Web Server \(httpd\).
     
 ## Bugs
