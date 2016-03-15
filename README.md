@@ -2,21 +2,24 @@
 
 ## Introduction
 
-Welcome to Git Hooks for WordPress, a collection of scripts to help with development and automated deployment of WordPress sites on different environments.
+Welcome to Git Hooks for WordPress, a collection of scripts to help with the development and automated deployment of WordPress sites on different environments.
 
 ### About
 
-If you've worked with WordPress sites, you have surely noted how there are surprisingly few solutions for version control, let alone a solution for multiple developers working in
-different environments, not to mention accomodating different site URLs for dev, stage, and production. The best approach to this so far is [VersionPress](http://versionpress.net/). Check out what they are doing. The tools here should remain free for all to use and will continue to improve over time.
+If you've worked with WordPress sites, you have surely noted how there are surprisingly few solutions for version control of a WordPress site's content (the `uploads` folder and database), let alone a solution for multiple developers working in different environments, not to mention accomodating different site URLs for dev, stage, and production. The best approach to this so far is [VersionPress](http://versionpress.net/). Check out what they are doing. The tools here will remain free for all to use and will continue to improve over time.
 
-These scripts provide a strategy for deploying a WordPress site in separate environments with their own site URL, theme and plugin installations, and custom setup commands. This
-is achieved through the use of [git hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) which are used with the repo which tracks the WordPress site's content. The hooks will install the site's core files and addons if they are not present, restore the DB saved in the `uploads` repo which is typically in the site's `wp-content/uploads` folder, and save the database as a SQL file in a `.db` folder in your site's `uploads`. With just the content of the `uploads`, the site's DB as a SQL file, a list of addons and an optional cleanup script, any WordPress site can be faithfully recreated. A multisite install will need a `.htaccess` and `wp-config.php` in the root site folder before running `post-checkout` for the first time. For a single site, they are created from configuration in `wp-addons.php`.
+These scripts provide a strategy for deploying a WordPress site in separate environments with their own site URL, addons (themes and plugins), and custom setup commands. This
+is achieved through the use of [git hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) which are stored in the `.git/hooks` folder of the repo tracking the WordPress site's content. The `wp-addons.example.php` and `cleanup.example.sh` provide minimal examples which should be tracked in your `uploads` repo. They will serve as the necessary starting point for the  untracked `wp-addons.php` and `cleanup.sh`. The non-example scripts will be suited to each environment so that each server can deviate from the primary example as needed. Some environments might have plugins that aid in development, or some server may need certain commands run afterwards that others don't. The example scripts, much like [.env.example](https://github.com/vlucas/phpdotenv), are intended to be tracked with the repo to define the main setup which can be altered in the untracked non-example files for the needs of the server.
+
+
+The hooks will install the site's core files and addons if they are not present, restore the DB saved in the `uploads` repo which is typically in the site's `wp-content/uploads` folder, and save the database as a SQL file in a `.db` folder in your site's `uploads`. With just the content of the `uploads`, the site's DB as a SQL file, a list of addons and an optional cleanup script, any WordPress site can be faithfully recreated. A multisite install will need a `.htaccess` and `wp-config.php` in the root site folder before running `post-checkout` for the first time. For a single site, these files can be created from configuration in `wp-addons.php`.
 
 ### Requirements
 
 * [wp-cli](http://wp-cli.org/)
 * A `wp-addons.php` file in `uploads/.setup` which defines the plugins, themes, and wp-config.
 * A `cleanup.sh` script in `uploads/.setup` with commands to be ran at the end of the setup (Optional)
+* A `.db` folder with a SQL file of the site's database. There should be one file within named after one of the sites defined in the git config.
 * A site definition section in `uploads/.git/config` which resembles the following:
 
 ### Example
@@ -28,7 +31,7 @@ is achieved through the use of [git hooks](https://git-scm.com/book/en/v2/Custom
 			live = example.com
 			deploy = test
 
-This would let your hooks know which site URLs that the DB files `test.sql` and `live.sql` refer to. It would install the `test` site on your server at the URL `local.example.com`.
+This would let your hooks know which site URLs that the DB files `uploads/.db/test.sql` and `uploads/.db/live.sql` refer to. It would install the `test` site on your server at the URL `local.example.com`.
             
 ### Files
 `get-wp-addons.php` is called by `post-checkout` to retrieve the list of plugins and themes to be installed and removed as defined by `wp-addons.php`
@@ -36,27 +39,27 @@ in the main project (uploads folder).
 
 `functions.sh` contains functions used by the shell scripts
 
-`install.sh` runs the commands for installing the core WordPress files, plugins, and themes. It also recreates the .htaccess rewrite rules if using httpd.
+`install.sh` runs the commands for installing the core WordPress files, plugins, and themes. It also recreates the `.htaccess` rewrite rules if using httpd.
 
 `remove.sh` removes the plugins and themes listed for deletion in the main project's `wp-addons.php`.
 
 `cleanup.example.sh` is a script that should be copied to `uploads/.setup/cleanup.sh` if additional commands should be run after the end of the setup.
             
-`pre-commit` will use wp-cli to save the WordPress database to a sql file named after the value in the `deploy` key, and then add this file to the index.
+`pre-commit` will use wp-cli to save the WordPress database to a SQL file named after the value in the `deploy` key in the git config, and then add this SQL file to the index.
 
 `post-merge` will call `post-checkout`
 
 `post-checkout` runs the `install.sh` script that uses `get-wp-addons.php` to read plugin and theme setup configuration from the `wp-addons.php` in the repo's working directory. It also expects a single SQL file in the `.db` folder to have a filename for a key naming one of your wp-sites. It then uses wp-cli to load the database from the file and then searches for the old site URL and replaces it with the `deploy` site URL.
 
+For multisite, the `wp-config.php` is searched for the new (`deploy`) site name and replaces it with the URL for the current SQL file's site name. When the site's database is being restored from the SQL file in `.db`, then the URL for the SQL file's site name must be present in `wp-config.php` in order for wp-cli's search-replace of the database to succeed. The wp-cli tool expects `wp-config.php` to match the site defined in the database. After the database gets the new site name, `post-checkout` sets `wp-config.php` to the new site name, completing the setup.
+
 `wp-addons.example.php` is an example configuration file for defining the themes and plugins to be managed for your site. `install.sh` will copy it to `wp-addons.php`
 in the main project if that file does not already exist.
 
-`wp-cli.yml` is a configuration file for WP-CLI that makes sure the .htaccess file is actually recreated.
-
-You can also provide a `cleanup.sh` in your uploads folder that is run at the end of the hooks, after themes and plugins have been removed.
+`wp-cli.yml` is a configuration file for wp-cli that makes sure the `.htaccess` file is actually recreated.
 
 ## Linking to project
-You may find it useful to create soft links from the scripts to your project's hooks directory, whereas some files should be copied to your project's `.setup` directory. You can do so with the following:
+You may find it useful to create soft links from the scripts to your project's `.git/hooks` directory, whereas some files should be copied to your project's `.setup` directory. You can do so with the following:
 
 ### Windows
     mklink \path\to\wp-content\uploads\.git\hooks\get-wp-addons.php \path\to\wpgithooks\get-wp-addons.php
@@ -78,13 +81,10 @@ You may find it useful to create soft links from the scripts to your project's h
 
 ## How to Use
 
-After you have either copied or symlinked the above files to the required directories and setup your `wp-addons.php` and optional `cleanup.sh`, you will be able
-to install all the core, plugin and theme files for your WordPress site. The hook scripts will also restore your database from the SQL file in your `uploads` folder's
-`.db` directory. This SQL file should be named after a site defined in the `wp-site` section of your local repo's `.git/config` file. The site assigned to the `deploy` key
-in the git config is the one that will be setup.
+After you have either copied or symlinked the above files to the required directories and setup your `wp-addons.php` and optional `cleanup.sh`, the installation of all the core files, plugins, themes, database and running of custom cleanup commands will all happen when a commit is checked out or merged into your `uploads` repo. You can work on the site, make changes to the site content, commit them, and rest assured that cloning the site content elsewhere will recreate everything that the WordPress web application requires.
 
-If restoring a multisite install, you will need to provide a [`wp-config.php`](https://codex.wordpress.org/Create_A_Network#Step_4:_Enabling_the_Network) and the [`.htaccess`](https://codex.wordpress.org/Multisite_Network_Administration#.htaccess_and_Mod_Rewrite) rules.
+If restoring a multisite install, you will need to provide a [`wp-config.php`](https://codex.wordpress.org/Create_A_Network#Step_4:_Enabling_the_Network) and the [`.htaccess`](https://codex.wordpress.org/Multisite_Network_Administration#.htaccess_and_Mod_Rewrite) rules if using Apache Web Server \(httpd\).
     
 ## Bugs
-* pre-commit hook may error when replacing .SQL from previous environment
+* pre-commit hook may occassionaly error when replacing .SQL from previous site name
 * Deleted plugins may not be properly disabled in the database, resulting in a message in the plugin screen reporting the completion of their removal.
