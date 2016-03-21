@@ -14,7 +14,7 @@ getWPDir () {
             WORDPRESS_DIR=../..
         fi        
     fi    
-    
+
     if [ ! -d "$WORDPRESS_DIR" ]; then
         echo $WORDPRESS_DIR
         echo -n "Please enter the path of the WordPress directory: "
@@ -31,6 +31,13 @@ getWPDir () {
     
     WORDPRESS_UPLOADS_DIR=$WORDPRESS_DIR/wp-content/uploads
     WORDPRESS_SETUP_DIR=$WORDPRESS_UPLOADS_DIR/.setup
+
+    if [ ! -d "$WORDPRESS_SETUP_DIR" ]; then
+       if ! mkdir --parents "$WORDPRESS_SETUP_DIR"; then
+          echo "Could not make WordPress uploads setup directory"
+          exit 1
+       fi
+    fi
 }
 
 getSiteNames() {
