@@ -7,6 +7,11 @@ setColors
 getWPDir
 getMultisite
 
+if ! type wp &> /dev/null; then
+    echo -e "$RED"WP-CLI is required to run these scripts. Please visit http://wp-cli.org/ for info on downloading and installing."$ENDCOLOR"
+    exit 1
+fi
+
 # Download the core files if necessary
 if ! .git/hooks/install.sh; then
     # IF there was a problem, exit with the last exit status
