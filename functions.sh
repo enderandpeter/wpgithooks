@@ -96,7 +96,7 @@ EOF
 }
 
 getMultisite() {
-    if [ ! -z "$(sed -n "/^define(\('\|\"\)MULTISITE/p" "$WORDPRESS_DIR"/wp-config.php)" ]; then
+    if [ -e "$WORDPRESS_DIR"/wp-config.php ] && [ ! -z "$(sed -n "/^define(\('\|\"\)MULTISITE/p" "$WORDPRESS_DIR"/wp-config.php)" ]; then
         IS_MULTISITE=true
     fi
 }
