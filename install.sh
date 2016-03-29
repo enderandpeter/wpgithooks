@@ -58,6 +58,16 @@ if [ ! -e "$WORDPRESS_SETUP_DIR"/wp-addons.php ]; then
     fi
 fi
 
+getSiteNames
+
+# Import the original DB if it is not loaded so that the addons will install
+if ! wp db tables 2> /dev/null; then
+    if ! wp db import "$SAVEPATH" $WP_CLI_PATH_OPTION; then
+        echo -e "$RED"Could not restore database"$ENDCOLOR"
+        exit 1
+    fi
+fi
+
 # Run each command for every plugin and theme returned
 # from get-wp-addons.php, if the addon is 
 echo -e "$YELLOW"Installing plugins and themes"$ENDCOLOR"
