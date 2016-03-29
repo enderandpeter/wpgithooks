@@ -95,7 +95,7 @@ done
 IFS=$OLD_IFS
 
 # Recreate .htaccess rules if httpd is detected
-if type httpd >> /dev/null; then
+if type httpd > /dev/null || type apachectl > /dev/null; then
     if [ $IS_MULTISITE ] && [ ! -e "$WORDPRESS_DIR"/.htaccess ]; then
         echo -e "$YELLOW"Remember to add multisite .htaccess rules"$ENDCOLOR"
     elif [ ! $IS_MULTISITE ]; then

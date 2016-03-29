@@ -41,5 +41,6 @@ if [ ! -e "$WORDPRESS_SETUP_DIR"/cleanup.sh ] ; then
         cp "$WORDPRESS_SETUP_DIR"/cleanup.example.sh "$WORDPRESS_SETUP_DIR"/cleanup.sh
     fi
     
+    chmod u+x "$WORDPRESS_SETUP_DIR"/cleanup.sh
 fi
 
