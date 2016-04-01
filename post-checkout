@@ -42,6 +42,9 @@ if ! wp search-replace "$OLDURL" "$NEWURL" $NETWORK --skip-columns=guid "$WP_CLI
 fi
 
 if [ $IS_MULTISITE ]; then
+	if grep "{{SITE_NAME}}" "$WORDPRESS_DIR"/wp-config.php; then
+		sed -i "s/{{SITE_NAME}}/$OLDURL/" "$WORDPRESS_DIR"/wp-config.php
+	fi
     echo -e "$YELLOW"Restoring current site name in wp-config.php"$ENDCOLOR"
     sed -i "s/$OLDURL/$NEWURL/" "$WORDPRESS_DIR"/wp-config.php
 fi
