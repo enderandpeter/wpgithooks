@@ -40,7 +40,7 @@ WHERE httpd > NUL && (
 
 IF NOT EXIST %_WORDPRESS_SETUP_DIR%\wp-addons.php (
     ECHO wp-addons.php was not found in the project.
-    IF NOT EXIST  %_WORDPRESS_UPLOADS_DIR%\wp-addons.example.php (
+    IF NOT EXIST  %_WORDPRESS_SETUP_DIR%\wp-addons.example.php (
         ECHO Copying example wp-addons from hooks repo.
         COPY wp-addons.example.php %_WORDPRESS_SETUP_DIR%\wp-addons.php
     ) ELSE (
@@ -56,7 +56,7 @@ IF NOT EXIST %_WORDPRESS_SETUP_DIR%\cleanup.sh (
         COPY cleanup.example.php %_WORDPRESS_UPLOADS_DIR%\cleanup.php
     ) ELSE (
         ECHO Copying example cleanup.sh from project repo.
-        COPY %_WORDPRESS_SETUP_DIR%\wp-addons.example.php %_WORDPRESS_SETUP_DIR%\wp-addons.php
+        COPY %_WORDPRESS_SETUP_DIR%\cleanup.example.sh %_WORDPRESS_SETUP_DIR%\cleanup.sh
     )    
 )
 

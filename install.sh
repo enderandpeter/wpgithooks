@@ -81,17 +81,27 @@ for command in "${commandlist[@]}"; do
 		ADDON_COMMAND="wp $command $plugin $WP_CLI_PATH_OPTION"
         echo -e $PURPLE$ADDON_COMMAND$ENDCOLOR
         IFS=$' '
-        if [ "$COMMAND_TYPE" == "install" ] && ! wp $ADDON_TYPE is-installed $ADDON_NAME $WP_CLI_PATH_OPTION; then
-            if ! $ADDON_COMMAND; then
-                echo -e "$PURPLE"There was an error running:"$ENDCOLOR" $command $plugin
-            fi        
-        else
-            if [ "$COMMAND_TYPE" == "install" ]; then
+        if [ "$COMMAND_TYPE" == "install" ]; then		
+			if [ "$(echo $ADDON_NAME | awk -F . '{print $NF}')" == "git" ]; then
+				addon_repo=$(basename $ADDON_NAME .git)
+				
+				if [ ! -d "$WORDPRESS_DIR"/wp-content/plugins/$addon_repo ]; then
+					if ! git clone $ADDON_NAME "$WORDPRESS_DIR"/wp-content/${ADDON_TYPE}s/$addon_repo; then
+						echo -e "$RED"Could not clone $ADDON_NAME to "$WORDPRESS_DIR"/wp-content/${ADDON_TYPE}s/$addon_repo"$ENDCOLOR"
+					fi
+				else
+					echo $ADDON_NAME is already installed
+				fi
+			elif ! wp $ADDON_TYPE is-installed $ADDON_NAME $WP_CLI_PATH_OPTION; then
+				if ! $ADDON_COMMAND; then
+					echo -e "$PURPLE"There was an error running:"$ENDCOLOR" $command $plugin
+				fi
+			else            
                 echo $ADDON_NAME is already installed
-            fi
+			fi
         fi
         
-        if [ "$COMMAND_TYPE" != "install" ] && wp $ADDON_TYPE is-installed $ADDON_NAME $WP_CLI_PATH_OPTION; then
+        if [ "$COMMAND_TYPE" != "install" ] && ! wp $ADDON_TYPE is-installed $ADDON_NAME $WP_CLI_PATH_OPTION; then
             if ! $ADDON_COMMAND; then
                 echo -e "$PURPLE"There was an error running:"$ENDCOLOR" $command $plugin
             fi 
