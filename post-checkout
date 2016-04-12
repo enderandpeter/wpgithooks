@@ -12,6 +12,8 @@ if ! type wp &> /dev/null; then
     exit 1
 fi
 
+getSiteNames
+
 if [ ! -z "$IS_MULTISITE" ]; then
 	if grep "{{SITE_NAME}}" "$WORDPRESS_DIR"/wp-config.php; then
 		sed -i "s/{{SITE_NAME}}/$OLDURL/" "$WORDPRESS_DIR"/wp-config.php
@@ -26,8 +28,6 @@ if ! .git/hooks/install.sh; then
     echo -e "$RED"Could not install WordPress site"$ENDCOLOR"
     exit $?
 fi
-
-getSiteNames
 
 echo -e "$YELLOW"Restoring the database"$ENDCOLOR"
 
