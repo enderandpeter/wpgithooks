@@ -15,7 +15,7 @@ fi
 getSiteNames
 
 if [ ! -z "$IS_MULTISITE" ]; then
-	if grep "{{SITE_NAME}}" "$WORDPRESS_DIR"/wp-config.php; then
+	if grep "{{SITE_NAME}}" "$WORDPRESS_DIR"/wp-config.php > /dev/null; then
 		sed -i "s/{{SITE_NAME}}/$OLDURL/" "$WORDPRESS_DIR"/wp-config.php
 	fi
 fi
