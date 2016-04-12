@@ -12,6 +12,14 @@ if ! type wp &> /dev/null; then
     exit 1
 fi
 
+if [ ! -z "$IS_MULTISITE" ]; then
+	if grep "{{SITE_NAME}}" "$WORDPRESS_DIR"/wp-config.php; then
+		sed -i "s/{{SITE_NAME}}/$OLDURL/" "$WORDPRESS_DIR"/wp-config.php
+	fi
+    echo -e "$YELLOW"Restoring current site name in wp-config.php"$ENDCOLOR"
+    sed -i "s/$OLDURL/$NEWURL/" "$WORDPRESS_DIR"/wp-config.php
+fi
+
 # Download the core files if necessary
 if ! .git/hooks/install.sh; then
     # IF there was a problem, exit with the last exit status
@@ -30,7 +38,7 @@ fi
 
 echo "Replacing $OLDURL with $NEWURL"
 
-if [ $IS_MULTISITE ]; then
+if [ ! -z "$IS_MULTISITE" ]; then
     echo -e "$YELLOW"Using previous site name in wp-config.php for DB search and replace"$ENDCOLOR"
     sed -i "s/$NEWURL/$OLDURL/" "$WORDPRESS_DIR"/wp-config.php
     NETWORK=--network
@@ -39,14 +47,6 @@ fi
 if ! wp search-replace "$OLDURL" "$NEWURL" $NETWORK --skip-columns=guid "$WP_CLI_PATH_OPTION"; then
 	echo -e "$RED""There was an error searching/replacing the WordPress database""$ENDCOLOR"
 	exit $?
-fi
-
-if [ $IS_MULTISITE ]; then
-	if grep "{{SITE_NAME}}" "$WORDPRESS_DIR"/wp-config.php; then
-		sed -i "s/{{SITE_NAME}}/$OLDURL/" "$WORDPRESS_DIR"/wp-config.php
-	fi
-    echo -e "$YELLOW"Restoring current site name in wp-config.php"$ENDCOLOR"
-    sed -i "s/$OLDURL/$NEWURL/" "$WORDPRESS_DIR"/wp-config.php
 fi
 
 if ! .git/hooks/remove.sh; then

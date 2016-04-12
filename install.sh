@@ -28,7 +28,7 @@ fi
 echo -e "$GREEN"WordPress installed in $WORDPRESS_DIR"$ENDCOLOR"
 
 if [ ! -e "$WORDPRESS_DIR"/wp-config.php ]; then
-    if [ $IS_MULTISITE ]; then    
+    if [ ! -z "$IS_MULTISITE" ]; then    
         echo -e "$RED"You must provide a wp-config.php if setting up multisite"$ENDCOLOR"
         exit 1
     else
@@ -116,9 +116,9 @@ IFS=$OLD_IFS
 
 # Recreate .htaccess rules if httpd is detected
 if type httpd &> /dev/null || type apachectl > /dev/null; then
-    if [ $IS_MULTISITE ] && [ ! -e "$WORDPRESS_DIR"/.htaccess ]; then
+    if [ ! -z "$IS_MULTISITE" ] && [ ! -e "$WORDPRESS_DIR"/.htaccess ]; then
         echo -e "$YELLOW"Remember to add multisite .htaccess rules"$ENDCOLOR"
-    elif [ ! $IS_MULTISITE ]; then
+    elif [ ! -z "$IS_MULTISITE" ]; then
         echo -e "$YELLOW"Recreating .htaccess rewrite rules"$ENDCOLOR"
         WP_CLI_CONFIG_PATH=$WORDPRESS_SETUP_DIR/wp-cli.yml wp rewrite flush --hard $WP_CLI_PATH_OPTION        
     fi
