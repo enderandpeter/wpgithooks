@@ -51,15 +51,23 @@ in the main project (uploads folder).
 
 `post-checkout` runs the `install.sh` script that uses `get-wp-addons.php` to read plugin and theme setup configuration from the `wp-addons.php` in the repo's working directory. It also expects a single SQL file in the `.db` folder to have a filename for a key naming one of your wp-sites. It then uses wp-cli to load the database from the file and then searches for the old site URL and replaces it with the `deploy` site URL.
 
-For multisite, the `wp-config.php` is searched for the new (`deploy`) site name and replaces it with the URL for the current SQL file's site name. When the site's database is being restored from the SQL file in `.db`, then the URL for the SQL file's site name must be present in `wp-config.php` in order for wp-cli's search-replace of the database to succeed. The wp-cli tool expects `wp-config.php` to match the site defined in the database. After the database gets the new site name, `post-checkout` sets `wp-config.php` to the new site name, completing the setup.
+For multisite, the `wp-config.php` is searched for the new (`deploy`) site name and replaces it with the URL for the current SQL file's site name. Before the database search and replace runs, the SQL file needs the old URL in wp-config.php. This is because the old site will still be defined in the database and wp-cli will think that the wp-config.php with the new site name is not for the current database. After the database gets the new site name, `post-checkout` sets `wp-config.php` to the new site name, completing the setup.
 
 `wp-addons.example.php` is an example configuration file for defining the themes and plugins to be managed for your site. `install.sh` will copy it to `wp-addons.php`
 in the main project if that file does not already exist.
 
 `wp-cli.yml` is a configuration file for wp-cli that makes sure the `.htaccess` file is actually recreated.
 
+`setup.bat` will setup the git hooks into the WordPress uploads folder on Windows. The `_WORDPRESS_DIR` environment variable can be set to the location of the WordPress
+directory, or it can be entered when prompted. The script will create softlinks for the hooks and copy the example scripts to their main locations.
+
+__Note__:  The scripts may not be linked correctly if you use msysgit's `ln` instead of CMD's `mklink`.
+
+`setup.sh` will setup the git hooks in the WordPress upload directory on Linux. `functions.sh` will be called beforehand to set the `WORDPRESS_DIR` environment variable to the
+WordPress directory.
+
 ## Linking to project
-You may find it useful to create soft links from the scripts to your project's `.git/hooks` directory, whereas some files should be copied to your project's `.setup` directory. You can do so with the following:
+You may find it useful to create soft links from the scripts to your project's `.git/hooks` directory, whereas some files should be copied to your project's `.setup` directory. The `setup` scripts will do this, but you can also do so with the following:
 
 ### Windows
     mklink \path\to\wp-content\uploads\.git\hooks\get-wp-addons.php \path\to\wpgithooks\get-wp-addons.php
@@ -85,8 +93,9 @@ After you have either copied or symlinked the above files to the required direct
 
 You can also start the installation and DB restoration process manually by running the `post-checkout` script.
 
-If restoring a multisite install, you will need to provide a [`wp-config.php`](https://codex.wordpress.org/Create_A_Network#Step_4:_Enabling_the_Network) and the [`.htaccess`](https://codex.wordpress.org/Multisite_Network_Administration#.htaccess_and_Mod_Rewrite) rules if using Apache Web Server \(httpd\).
+If restoring a multisite install, you will need to provide a [`wp-config.php`](https://codex.wordpress.org/Create_A_Network#Step_4:_Enabling_the_Network). The multisite [`.htaccess`](https://codex.wordpress.org/Multisite_Network_Administration#.htaccess_and_Mod_Rewrite) rules must also be present if using Apache Web Server \(httpd\).
     
 ## Bugs
 * pre-commit hook may occassionaly error when replacing .SQL from previous site name
 * Deleted plugins may not be properly disabled in the database, resulting in a message in the plugin screen reporting the completion of their removal.
+* Most version trackers will more than likely not be able to do any kind of smart merging between the SQL changes in the commits, and so when a project environment is updated, the latest changes will always overwrite whatever is present.
