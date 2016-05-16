@@ -1,0 +1,6 @@
+# The *.example.php files are to track changes to production deployment and to recommend settings for other environments. 
+# If the ignored *.php counterparts are not present, copy the example files to the *.php file names in order to use their configuration in this environment.
+
+wp-addons.php
+cleanup.sh
+wp-cli.yml

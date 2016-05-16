@@ -30,11 +30,16 @@ FOR %%G IN (get-wp-addons.php,functions.sh,install.sh,remove.sh,post-checkout,po
 )
 
 WHERE httpd > NUL && (    
-    IF NOT EXIST %_WORDPRESS_SETUP_DIR%\wp-cli.yml (
+    IF NOT EXIST %_WORDPRESS_SETUP_DIR%\wp-cli.example.yml (
         ECHO Detected httpd. Copying YML...
-        COPY %0\..\wp-cli.yml %_WORDPRESS_SETUP_DIR%
+        COPY %0\..\wp-cli.example.yml %_WORDPRESS_SETUP_DIR%\wp-cli.yml
+        COPY %0\..\wp-cli.example.yml %_WORDPRESS_SETUP_DIR%
     ) ELSE (
-        ECHO WP-CLI configuration found at %_WORDPRESS_SETUP_DIR%\wp-cli.yml
+        IF NOT EXIST %_WORDPRESS_SETUP_DIR%\wp-cli.yml (
+            COPY %_WORDPRESS_SETUP_DIR%\wp-cli.example.yml %_WORDPRESS_SETUP_DIR%\wp-cli.yml
+        ) ELSE (
+            ECHO WP-CLI configuration found at %_WORDPRESS_SETUP_DIR%\wp-cli.yml
+        )
     )
 )
 
@@ -43,6 +48,7 @@ IF NOT EXIST %_WORDPRESS_SETUP_DIR%\wp-addons.php (
     IF NOT EXIST  %_WORDPRESS_SETUP_DIR%\wp-addons.example.php (
         ECHO Copying example wp-addons from hooks repo.
         COPY %0\..\wp-addons.example.php %_WORDPRESS_SETUP_DIR%\wp-addons.php
+        COPY %0\..\wp-addons.example.php %_WORDPRESS_SETUP_DIR%
     ) ELSE (
         ECHO Copying example wp-addons from project repo.
         COPY %_WORDPRESS_SETUP_DIR%\wp-addons.example.php %_WORDPRESS_SETUP_DIR%\wp-addons.php
@@ -53,7 +59,7 @@ IF NOT EXIST %_WORDPRESS_SETUP_DIR%\cleanup.sh (
     ECHO A cleanup script was not found in the project.
     IF NOT EXIST  %_WORDPRESS_SETUP_DIR%\cleanup.example.sh (
         ECHO Copying example cleanup.sh from hooks repo.
-        COPY %0\..\cleanup.example.sh %_WORDPRESS_SETUP_DIR%\cleanup.sh
+        COPY %0\..\cleanup.example.sh %_WORDPRESS_SETUP_DIR%
     ) ELSE (
         ECHO Copying example cleanup.sh from project repo.
         COPY %_WORDPRESS_SETUP_DIR%\cleanup.example.sh %_WORDPRESS_SETUP_DIR%\cleanup.sh
