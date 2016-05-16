@@ -56,18 +56,18 @@ For multisite, the `wp-config.php` is searched for the new (`deploy`) site name 
 `wp-addons.example.php` is an example configuration file for defining the themes and plugins to be managed for your site. `install.sh` will copy it to `wp-addons.php`
 in the main project if that file does not already exist.
 
-`wp-cli.yml` is a configuration file for wp-cli that makes sure the `.htaccess` file is actually recreated.
+`wp-cli.example.yml` is an example configuration file for wp-cli that makes sure the `.htaccess` file is actually recreated. Copy this to `uploads/.setup/wp-cli.yml`.
 
 `setup.bat` will setup the git hooks into the WordPress uploads folder on Windows. The `_WORDPRESS_DIR` environment variable can be set to the location of the WordPress
 directory, or it can be entered when prompted. The script will create softlinks for the hooks and copy the example scripts to their main locations.
 
-__Note__:  The scripts may not be linked correctly if you use msysgit's `ln` instead of CMD's `mklink`.
+__Note__:  On Windows, use CMD's `mklink` to make sure the scripts are properly linked instead of msysgit's `ln`.
 
 `setup.sh` will setup the git hooks in the WordPress upload directory on Linux. `functions.sh` will be called beforehand to set the `WORDPRESS_DIR` environment variable to the
 WordPress directory.
 
 ## Linking to project
-You may find it useful to create soft links from the scripts to your project's `.git/hooks` directory, whereas some files should be copied to your project's `.setup` directory. The `setup` scripts will do this, but you can also do so with the following:
+You may find it useful to create symbolic links from the scripts to your project's `.git/hooks` directory, whereas some files should be copied to your project's `.setup` directory. The `setup` scripts will do this, but you can also do so with the following:
 
 ### Windows
     mklink \path\to\wp-content\uploads\.git\hooks\get-wp-addons.php \path\to\wpgithooks\get-wp-addons.php
@@ -78,14 +78,20 @@ You may find it useful to create soft links from the scripts to your project's `
     mklink \path\to\wp-content\uploads\wp-content\uploads\.git\hooks\post-merge \path\to\wpgithooks\post-merge
     mklink \path\to\wp-content\uploads\wp-content\uploads\.git\hooks\post-checkout \path\to\wpgithooks\post-checkout
     copy \path\to\wpgithooks\wp-addons.example.php \path\to\project\.setup\wp-addons.php
+    copy \path\to\wpgithooks\wp-addons.example.php \path\to\project\.setup
     copy \path\to\wpgithooks\cleanup.example.sh \path\to\project\.setup\cleanup.sh
-    copy \path\to\wpgithooks\wp-cli.yml \path\to\project\.setup
+    copy \path\to\wpgithooks\cleanup.example.sh \path\to\project\.setup
+    copy \path\to\wpgithooks\wp-cli.example.yml \path\to\project\.setup\wp-cli.yml
+    copy \path\to\wpgithooks\wp-cli.example.yml \path\to\project\.setup
 
 ### Linux/OS X
     ln -s /path/to/wpgithooks/{get-wp-addons.php,p*,install.sh,functions.sh} /path/to/project/.git/hooks    
-    cp /path/to/wpgithooks/wp-cli.yml /path/to/project
+    cp /path/to/wpgithooks/wp-cli.example.yml /path/to/project/wp-cli.yml
+    cp /path/to/wpgithooks/wp-cli.example.yml /path/to/project
     cp /path/to/wpgithooks/wp-addons.example.php /path/to/project/.setup/wp-addons.php
+    cp /path/to/wpgithooks/wp-addons.example.php /path/to/project/.setup
     cp /path/to/wpgithooks/cleanup.example.sh /path/to/project/.setup/cleanup.sh
+    cp /path/to/wpgithooks/cleanup.example.sh /path/to/project/.setup
 
 ## How to Use
 
