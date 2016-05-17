@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CURRENT_DIR=$(dirname "$BASH_SOURCE")
+CURRENT_DIR=$(realpath $(dirname "$BASH_SOURCE"))
 
 source "$CURRENT_DIR"/functions.sh
 
@@ -15,7 +15,8 @@ ln --symbolic "$CURRENT_DIR"/{get-wp-addons.php,p*,install.sh,remove.sh,function
 
 echo -e "$YELLOW"Copying YML if httpd is available..."$ENDCOLOR"
 if type apachectl &> /dev/null; then
-    cp "$CURRENT_DIR"/wp-cli.yml "$WORDPRESS_SETUP_DIR"
+    cp "$CURRENT_DIR"/wp-cli.example.yml "$WORDPRESS_SETUP_DIR"/wp-cli.yml
+    cp "$CURRENT_DIR"/wp-cli.example.yml "$WORDPRESS_SETUP_DIR"
 fi
 
 
@@ -24,6 +25,7 @@ if [ ! -e "$WORDPRESS_SETUP_DIR"/wp-addons.php ] ; then
     if [ ! -e "$WORDPRESS_SETUP_DIR"/wp-addons.example.php ]; then
         echo -e "$YELLOW"Copying example wp-addons from hooks repo."$ENDCOLOR"
         cp "$CURRENT_DIR"/wp-addons.example.php "$WORDPRESS_SETUP_DIR"/wp-addons.php
+        cp "$CURRENT_DIR"/wp-addons.example.php "$WORDPRESS_SETUP_DIR"
     else
         echo -e "$YELLOW"Copying example wp-addons from project repo."$ENDCOLOR"
         cp "$WORDPRESS_SETUP_DIR"/wp-addons.example.php "$WORDPRESS_SETUP_DIR"/wp-addons.php
@@ -36,6 +38,7 @@ if [ ! -e "$WORDPRESS_SETUP_DIR"/cleanup.sh ] ; then
     if [ ! -e "$WORDPRESS_SETUP_DIR"/cleanup.example.sh ]; then
         echo -e "$YELLOW"Copying example cleanup.sh from hooks repo."$ENDCOLOR"
         cp "$CURRENT_DIR"/cleanup.example.sh "$WORDPRESS_SETUP_DIR"/cleanup.sh
+        cp "$CURRENT_DIR"/cleanup.example.sh "$WORDPRESS_SETUP_DIR"
     else
         echo -e "$YELLOW"Copying example cleanup.sh from project repo."$ENDCOLOR"
         cp "$WORDPRESS_SETUP_DIR"/cleanup.example.sh "$WORDPRESS_SETUP_DIR"/cleanup.sh
