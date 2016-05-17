@@ -117,10 +117,12 @@ IFS=$OLD_IFS
 
 # Recreate .htaccess rules if httpd is detected
 if type httpd &> /dev/null || type apachectl > /dev/null; then
-    if [ ! -z "$IS_MULTISITE" ] && [ ! -e "$WORDPRESS_DIR"/.htaccess ]; then
-        echo -e "$YELLOW"Remember to add multisite .htaccess rules"$ENDCOLOR"
-    elif [ ! -z "$IS_MULTISITE" ]; then
-        echo -e "$YELLOW"Recreating .htaccess rewrite rules"$ENDCOLOR"
-        WP_CLI_CONFIG_PATH=$WORDPRESS_SETUP_DIR/wp-cli.yml wp rewrite flush --hard $WP_CLI_PATH_OPTION        
+    if [ ! -e "$WORDPRESS_DIR"/.htaccess ]; then
+        if [ ! -z "$IS_MULTISITE" ]; then
+            echo -e "$YELLOW"Remember to add multisite .htaccess rules"$ENDCOLOR"
+        else
+            echo -e "$YELLOW"Recreating .htaccess rewrite rules"$ENDCOLOR"
+            WP_CLI_CONFIG_PATH=$WORDPRESS_SETUP_DIR/wp-cli.yml wp rewrite flush --hard $WP_CLI_PATH_OPTION        
+        fi
     fi
 fi
