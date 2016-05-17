@@ -81,7 +81,8 @@ for command in "${commandlist[@]}"; do
 		ADDON_COMMAND="wp $command $plugin $WP_CLI_PATH_OPTION"
         echo -e $PURPLE$ADDON_COMMAND$ENDCOLOR
         IFS=$' '
-        if [ "$COMMAND_TYPE" == "install" ]; then		
+        if [ "$COMMAND_TYPE" == "install" ]; then
+            # If the URL ends with .git, treat it like a remote git repo
 			if [ "$(echo $ADDON_NAME | awk -F . '{print $NF}')" == "git" ]; then
 				addon_repo=$(basename $ADDON_NAME .git)
 				

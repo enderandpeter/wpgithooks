@@ -9,6 +9,9 @@ SET _WORDPRESS_SETUP_DIR=%_WORDPRESS_UPLOADS_DIR%\.setup
 
 IF NOT EXIST %_WORDPRESS_UPLOADS_DIR%\.git\hooks (
     ECHO Could not find git hooks directory in %_WORDPRESS_UPLOADS_DIR%
+    SET _WORDPRESS_DIR=
+    SET _WORDPRESS_SETUP_DIR=
+    SET _WORDPRESS_UPLOADS_DIR=
     EXIT /B
 )
 
@@ -20,7 +23,7 @@ ECHO Symlinking hook files...
 
 FOR %%G IN (get-wp-addons.php,functions.sh,install.sh,remove.sh,post-checkout,post-merge,post-commit) DO (
     IF NOT EXIST %_WORDPRESS_UPLOADS_DIR%\.git\hooks\%%G (
-        MKLINK %_WORDPRESS_UPLOADS_DIR%\.git\hooks\%%G %CD%\%%G || (
+        MKLINK %_WORDPRESS_UPLOADS_DIR%\.git\hooks\%%G %0\..\%%G || (
             ECHO Could not create symlinks 
             EXIT /B
         )
@@ -64,6 +67,11 @@ IF NOT EXIST %_WORDPRESS_SETUP_DIR%\cleanup.sh (
         ECHO Copying example cleanup.sh from project repo.
         COPY %_WORDPRESS_SETUP_DIR%\cleanup.example.sh %_WORDPRESS_SETUP_DIR%\cleanup.sh
     )    
+)
+
+IF NOT EXIST %_WORDPRESS_SETUP_DIR%\.gitignore (
+    ECHO Copying gitignore to .setup
+    COPY %0\..\setup.gitignore %_WORDPRESS_SETUP_DIR%\.gitignore
 )
 
 ECHO To install the site, open an msysgit terminal and enter: cd "%_WORDPRESS_UPLOADS_DIR%" ^&^& .git/hooks/post-checkout
