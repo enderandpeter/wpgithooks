@@ -21,7 +21,7 @@ IF NOT EXIST %_WORDPRESS_SETUP_DIR% (
 
 ECHO Symlinking hook files...
 
-FOR %%G IN (get-wp-addons.php,functions.sh,install.sh,remove.sh,post-checkout,post-merge,post-commit) DO (
+FOR %%G IN (get-wp-addons.php,functions.sh,install.sh,remove.sh,post-checkout,post-merge,pre-commit) DO (
     IF NOT EXIST %_WORDPRESS_UPLOADS_DIR%\.git\hooks\%%G (
         MKLINK %_WORDPRESS_UPLOADS_DIR%\.git\hooks\%%G %0\..\%%G || (
             ECHO Could not create symlinks 
