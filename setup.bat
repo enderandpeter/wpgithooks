@@ -62,6 +62,7 @@ IF NOT EXIST %_WORDPRESS_SETUP_DIR%\cleanup.sh (
     ECHO A cleanup script was not found in the project.
     IF NOT EXIST  %_WORDPRESS_SETUP_DIR%\cleanup.example.sh (
         ECHO Copying example cleanup.sh from hooks repo.
+        COPY %0\..\cleanup.example.sh %_WORDPRESS_SETUP_DIR%\cleanup.sh
         COPY %0\..\cleanup.example.sh %_WORDPRESS_SETUP_DIR%
     ) ELSE (
         ECHO Copying example cleanup.sh from project repo.
