@@ -23,7 +23,7 @@ ECHO Symlinking hook files...
 
 FOR %%G IN (get-wp-addons.php,functions.sh,install.sh,remove.sh,post-checkout,post-merge,pre-commit) DO (
     IF NOT EXIST %_WORDPRESS_UPLOADS_DIR%\.git\hooks\%%G (
-        MKLINK %_WORDPRESS_UPLOADS_DIR%\.git\hooks\%%G %0\..\%%G || (
+        MKLINK %_WORDPRESS_UPLOADS_DIR%\.git\hooks\%%G %~dp0\%%G || (
             ECHO Could not create symlinks 
             EXIT /B
         )
