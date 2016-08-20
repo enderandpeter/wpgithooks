@@ -41,7 +41,7 @@ if [ ! -z "$IS_MULTISITE" ]; then
     sed -i "s/$NEWURL/$OLDURL/" "$WORDPRESS_DIR"/wp-config.php
     NETWORK=--network
 fi
-
+echo wp search-replace "$OLDURL" "$NEWURL" $NETWORK --skip-columns=guid "$WP_CLI_PATH_OPTION"
 if ! wp search-replace "$OLDURL" "$NEWURL" $NETWORK --skip-columns=guid "$WP_CLI_PATH_OPTION"; then
 	echo -e "$RED""There was an error searching/replacing the WordPress database""$ENDCOLOR"
 	exit $?
