@@ -85,10 +85,11 @@ for command in "${commandlist[@]}"; do
             # If the URL ends with .git, treat it like a remote git repo
 			if [ "$(echo $ADDON_NAME | awk -F . '{print $NF}')" == "git" ]; then
 				addon_repo=$(basename $ADDON_NAME .git)
+				addon_repo_dir="$WORDPRESS_DIR"/wp-content/${ADDON_TYPE}s/$addon_repo
 				
-				if [ ! -d "$WORDPRESS_DIR"/wp-content/plugins/$addon_repo ]; then
-					if ! git clone $ADDON_NAME "$WORDPRESS_DIR"/wp-content/${ADDON_TYPE}s/$addon_repo; then
-						echo -e "$RED"Could not clone $ADDON_NAME to "$WORDPRESS_DIR"/wp-content/${ADDON_TYPE}s/$addon_repo"$ENDCOLOR"
+				if [ ! -d $addon_repo_dir ]; then
+					if ! git clone $ADDON_NAME $addon_repo_dir; then
+						echo -e "$RED"Could not clone $ADDON_NAME to $addon_repo_dir"$ENDCOLOR"
 					fi
 				else
 					echo $ADDON_NAME is already installed
