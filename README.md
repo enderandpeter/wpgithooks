@@ -63,8 +63,7 @@ directory, or it can be entered when prompted. The script will create softlinks 
 
 __Note__:  On Windows, use CMD's `mklink` to make sure the scripts are properly linked instead of msysgit's `ln`.
 
-`setup.sh` will setup the git hooks in the WordPress upload directory on Linux. `functions.sh` will be called beforehand to set the `WORDPRESS_DIR` environment variable to the
-WordPress directory.
+`setup.sh` will setup the git hooks in the WordPress upload directory on Linux. `getWPDir` from `functions.sh` will be called to set the `WORDPRESS_DIR` environment variable to the WordPress directory.
 
 ## Linking to project
 You may find it useful to create symbolic links from the scripts to your project's `.git/hooks` directory, whereas some files should be copied to your project's `.setup` directory. The `setup` scripts will do this, but you can also do so with the following:
