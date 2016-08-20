@@ -11,7 +11,7 @@ if ! getWPDir; then
 fi
 
 echo -e "$YELLOW"Symlinking hook files..."$ENDCOLOR"
-ln --symbolic "$CURRENT_DIR"/{get-wp-addons.php,p*,install.sh,remove.sh,functions.sh} "$WORDPRESS_UPLOADS_DIR"/.git/hooks    
+ln -s "$CURRENT_DIR"/{get-wp-addons.php,p*,install.sh,remove.sh,functions.sh} "$WORDPRESS_UPLOADS_DIR"/.git/hooks    
 
 echo -e "$YELLOW"Copying YML if httpd is available..."$ENDCOLOR"
 if type apachectl &> /dev/null; then
