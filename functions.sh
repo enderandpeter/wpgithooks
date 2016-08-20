@@ -19,6 +19,8 @@ getWPDir () {
         echo $WORDPRESS_DIR
         echo -n "Please enter the path of the WordPress directory: "
         read WORDPRESS_DIR
+        # If path contains ~, expand it to $HOME
+        WORDPRESS_DIR="${WORDPRESS_DIR/#\~/$HOME}"
         if [ ! -d "$WORDPRESS_DIR" ]; then
             echo -e "$RED"Could not find the directory: $WORDPRESS_DIR"$ENDCOLOR"
             exit

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CURRENT_DIR=$(realpath $(dirname "$BASH_SOURCE"))
+CURRENT_DIR=$( cd "$(dirname "$0")" ; pwd -P )
 
 source "$CURRENT_DIR"/functions.sh
 
