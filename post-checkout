@@ -47,6 +47,13 @@ if ! wp search-replace "$OLDURL" "$NEWURL" $NETWORK --skip-columns=guid "$WP_CLI
 	exit $?
 fi
 
+echo "Replacing http:// with //"
+
+if ! wp search-replace "http://" "//" $NETWORK --skip-columns=guid "$WP_CLI_PATH_OPTION"; then
+	echo -e "$RED""There was an error setting HTTPS URLs in the WordPress database""$ENDCOLOR"
+	exit $?
+fi
+
 if [ ! -z "$IS_MULTISITE" ]; then
 	echo -e "$YELLOW"Restoring current site name in wp-config.php"$ENDCOLOR"
     sed -i "s/$OLDURL/$NEWURL/" "$WORDPRESS_DIR"/wp-config.php
