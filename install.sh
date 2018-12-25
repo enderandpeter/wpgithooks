@@ -17,7 +17,7 @@ CORE="wp core"
 CORE_IS_INSTALLED="$CORE is-installed $WP_CLI_PATH_OPTION"
 CORE_DOWNLOAD="$CORE download $WP_CLI_PATH_OPTION"
 CORE_INSTALL="$CORE install --quiet $WP_CLI_PATH_OPTION"
- 
+
 # If WordPress core is not installed, then download and install it.
 if ! $CORE_IS_INSTALLED >> /dev/null; then
     echo -e "$YELLOW"Installing WordPress in $WORDPRESS_DIR"$ENDCOLOR";
@@ -28,7 +28,7 @@ fi
 echo -e "$GREEN"WordPress installed in $WORDPRESS_DIR"$ENDCOLOR"
 
 if [ ! -e "$WORDPRESS_DIR"/wp-config.php ]; then
-    if [ ! -z "$IS_MULTISITE" ]; then    
+    if [ ! -z "$IS_MULTISITE" ]; then
         echo -e "$RED"You must provide a wp-config.php if setting up multisite"$ENDCOLOR"
         exit 1
     else
@@ -51,7 +51,7 @@ if [ ! -e "$WORDPRESS_SETUP_DIR"/wp-addons.php ]; then
         echo -e "$RED"Please add a wp-addons.example.php to your uploads repo or a wp-addons.php to your uploads working directory"$ENDCOLOR"
         exit 1
     fi
-    
+
     if ! cp "$EXAMPLE_ADDONS" "$WORDPRESS_SETUP_DIR"/wp-addons.php; then
         echo -e "$RED"Could not copy addons config from "$EXAMPLE_ADDONS" to "$WORDPRESS_SETUP_DIR"/wp-addons.php"$ENDCOLOR"
         exit 1
@@ -69,12 +69,12 @@ if ! wp db tables &> /dev/null; then
 fi
 
 # Run each command for every plugin and theme returned
-# from get-wp-addons.php, if the addon is 
+# from get-wp-addons.php, if the addon is
 echo -e "$YELLOW"Installing plugins and themes"$ENDCOLOR"
 for command in "${commandlist[@]}"; do
-    plugins=$(IFS=$' \n\t';php -f .git/hooks/get-wp-addons.php $command)        
+    plugins=$(IFS=$' \n\t';php -f .git/hooks/get-wp-addons.php $command)
     IFS=$'\n'
-    for plugin in $plugins; do        
+    for plugin in $plugins; do
         ADDON_TYPE=$(echo $command | cut -d ' ' -f 1)
         ADDON_NAME=$(echo $plugin | cut -d ' ' -f 1)
         COMMAND_TYPE=$(echo $command | cut -d ' ' -f 2)
@@ -86,7 +86,7 @@ for command in "${commandlist[@]}"; do
 			if [ "$(echo $ADDON_NAME | awk -F . '{print $NF}')" == "git" ]; then
 				addon_repo=$(basename $ADDON_NAME .git)
 				addon_repo_dir="$WORDPRESS_DIR"/wp-content/${ADDON_TYPE}s/$addon_repo
-				
+
 				if [ ! -d $addon_repo_dir ]; then
 					if ! git clone $ADDON_NAME $addon_repo_dir; then
 						echo -e "$RED"Could not clone $ADDON_NAME to $addon_repo_dir"$ENDCOLOR"
@@ -98,15 +98,15 @@ for command in "${commandlist[@]}"; do
 				if ! $ADDON_COMMAND; then
 					echo -e "$PURPLE"There was an error running:"$ENDCOLOR" $command $plugin
 				fi
-			else            
+			else
                 echo $ADDON_NAME is already installed
 			fi
         fi
-        
+
         if [ "$COMMAND_TYPE" != "install" ] && ! wp $ADDON_TYPE is-installed $ADDON_NAME $WP_CLI_PATH_OPTION; then
             if ! $ADDON_COMMAND; then
                 echo -e "$PURPLE"There was an error running:"$ENDCOLOR" $command $plugin
-            fi 
+            fi
         else
             if [ "$COMMAND_TYPE" != "install" ]; then
                 echo $ADDON_NAME has already been removed
@@ -117,13 +117,19 @@ done
 IFS=$OLD_IFS
 
 # Recreate .htaccess rules if httpd is detected
-if type httpd &> /dev/null || type apachectl > /dev/null; then
+if type httpd &> /dev/null ||
+   type apachectl &> /dev/null ||
+   type apache &> /dev/null ||
+   type apache2 &> /dev/null; then
+    echo "Found Apache Web Server..."
     if [ ! -e "$WORDPRESS_DIR"/.htaccess ]; then
         if [ ! -z "$IS_MULTISITE" ]; then
             echo -e "$YELLOW"Remember to add multisite .htaccess rules"$ENDCOLOR"
         else
             echo -e "$YELLOW"Recreating .htaccess rewrite rules"$ENDCOLOR"
-            WP_CLI_CONFIG_PATH=$WORDPRESS_SETUP_DIR/wp-cli.yml wp rewrite flush --hard $WP_CLI_PATH_OPTION        
+            WP_CLI_CONFIG_PATH=$WORDPRESS_SETUP_DIR/wp-cli.yml wp rewrite flush --hard $WP_CLI_PATH_OPTION
         fi
     fi
+  else
+    echo "Did not find Apache Web Server"
 fi
