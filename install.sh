@@ -36,7 +36,7 @@ if [ ! -e "$WORDPRESS_DIR"/wp-config.php ]; then
 
         config=$(IFS=$' \n\t';php -f .git/hooks/get-wp-addons.php config)
 
-        CONFIG_COMMAND="$CORE config $config $WP_CLI_PATH_OPTION"
+        CONFIG_COMMAND="wp config create $config $WP_CLI_PATH_OPTION"
         if ! $CONFIG_COMMAND; then
             echo -e "$RED"Could not create wp-config"$ENDCOLOR"
             exit 1
