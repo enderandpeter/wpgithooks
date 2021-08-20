@@ -9,7 +9,7 @@ Welcome to Git Hooks for WordPress, a collection of scripts to help with the dev
 If you've worked with WordPress sites, you have surely noted how there are surprisingly few solutions for version control of a WordPress site's content (the `uploads` folder and database), let alone a solution for multiple developers working in different environments, not to mention accomodating different site URLs for dev, stage, and production. The best approach to this so far is [VersionPress](http://versionpress.net/). Check out what they are doing. The tools here will remain free for all to use and will continue to improve over time.
 
 These scripts provide a strategy for deploying a WordPress site in separate environments with their own site URL, addons (themes and plugins), and custom setup commands. This
-is achieved through the use of [git hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) which are stored in the `.git/hooks` folder of the repo tracking the WordPress site's content. The `wp-addons.example.php` and `cleanup.example.sh` provide minimal examples which should be tracked in your `uploads` repo. They will serve as the necessary starting point for the  untracked `wp-addons.php` and `cleanup.sh`. The non-example scripts will be suited to each environment so that each server can deviate from the primary example as needed. Some environments might have plugins that aid in development, or some server may need certain commands run afterwards that others don't. The example scripts, much like [.env.example](https://github.com/vlucas/phpdotenv), are intended to be tracked with the repo to define the main setup which can be altered in the untracked non-example files for the needs of the server.
+is achieved through the use of [git hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) which are stored in the `.git/hooks` folder of the repo tracking the WordPress site's content. The `wp-addons.php.example` and `cleanup.sh.example` provide minimal examples which should be tracked in your `uploads` repo. They will serve as the necessary starting point for the  untracked `wp-addons.php` and `cleanup.sh`. The non-example scripts will be suited to each environment so that each server can deviate from the primary example as needed. Some environments might have plugins that aid in development, or some server may need certain commands run afterwards that others don't. The example scripts, much like [.env.example](https://github.com/vlucas/phpdotenv), are intended to be tracked with the repo to define the main setup which can be altered in the untracked non-example files for the needs of the server.
 
 
 The hooks will install the site's core files and addons if they are not present, restore the DB saved in the `uploads` repo which is typically in the site's `wp-content/uploads` folder, and save the database as a SQL file in a `.db` folder in your site's `uploads`. With just the content of the `uploads`, the site's DB as a SQL file, a list of addons and an optional cleanup script, any WordPress site can be faithfully recreated. A multisite install will need a `.htaccess` and `wp-config.php` in the root site folder before running `post-checkout` for the first time. For a single site, these files can be created from configuration in `wp-addons.php`.
@@ -43,7 +43,7 @@ in the main project (uploads folder).
 
 `remove.sh` removes the plugins and themes listed for deletion in the main project's `wp-addons.php`.
 
-`cleanup.example.sh` is a script that should be copied to `uploads/.setup/cleanup.sh` if additional commands should be run after the end of the setup.
+`cleanup.sh.example` is a script that should be copied to `uploads/.setup/cleanup.sh` if additional commands should be run after the end of the setup.
             
 `pre-commit` will use wp-cli to save the WordPress database to a SQL file named after the value in the `deploy` key in the git config, and then add this SQL file to the index.
 
@@ -53,10 +53,10 @@ in the main project (uploads folder).
 
 For multisite, the `wp-config.php` is searched for the new (`deploy`) site name and replaces it with the URL for the current SQL file's site name. Before the database search and replace runs, the SQL file needs the old URL in wp-config.php. This is because the old site will still be defined in the database and wp-cli will think that the wp-config.php with the new site name is not for the current database. After the database gets the new site name, `post-checkout` sets `wp-config.php` to the new site name, completing the setup.
 
-`wp-addons.example.php` is an example configuration file for defining the themes and plugins to be managed for your site. `install.sh` will copy it to `wp-addons.php`
+`wp-addons.php.example` is an example configuration file for defining the themes and plugins to be managed for your site. `install.sh` will copy it to `wp-addons.php`
 in the main project if that file does not already exist.
 
-`wp-cli.example.yml` is an example configuration file for wp-cli that makes sure the `.htaccess` file is actually recreated. Copy this to `uploads/.setup/wp-cli.yml`.
+`wp-cli.yml.example` is an example configuration file for wp-cli that makes sure the `.htaccess` file is actually recreated. Copy this to `uploads/.setup/wp-cli.yml`.
 
 `setup.bat` will setup the git hooks into the WordPress uploads folder on Windows. The `_WORDPRESS_DIR` environment variable can be set to the location of the WordPress
 directory, or it can be entered when prompted. The script will create softlinks for the hooks and copy the example scripts to their main locations.
@@ -76,21 +76,21 @@ You may find it useful to create symbolic links from the scripts to your project
     mklink \path\to\wp-content\uploads\wp-content\uploads\.git\hooks\pre-commit \path\to\wpgithooks\pre-commit
     mklink \path\to\wp-content\uploads\wp-content\uploads\.git\hooks\post-merge \path\to\wpgithooks\post-merge
     mklink \path\to\wp-content\uploads\wp-content\uploads\.git\hooks\post-checkout \path\to\wpgithooks\post-checkout
-    copy \path\to\wpgithooks\wp-addons.example.php \path\to\project\.setup\wp-addons.php
-    copy \path\to\wpgithooks\wp-addons.example.php \path\to\project\.setup
-    copy \path\to\wpgithooks\cleanup.example.sh \path\to\project\.setup\cleanup.sh
-    copy \path\to\wpgithooks\cleanup.example.sh \path\to\project\.setup
-    copy \path\to\wpgithooks\wp-cli.example.yml \path\to\project\.setup\wp-cli.yml
-    copy \path\to\wpgithooks\wp-cli.example.yml \path\to\project\.setup
+    copy \path\to\wpgithooks\wp-addons.php.example \path\to\project\.setup\wp-addons.php
+    copy \path\to\wpgithooks\wp-addons.php.example \path\to\project\.setup
+    copy \path\to\wpgithooks\cleanup.sh.example \path\to\project\.setup\cleanup.sh
+    copy \path\to\wpgithooks\cleanup.sh.example \path\to\project\.setup
+    copy \path\to\wpgithooks\wp-cli.yml.example \path\to\project\.setup\wp-cli.yml
+    copy \path\to\wpgithooks\wp-cli.yml.example \path\to\project\.setup
 
 ### Linux/OS X
     ln -s /path/to/wpgithooks/{get-wp-addons.php,p*,install.sh,functions.sh} /path/to/project/.git/hooks    
-    cp /path/to/wpgithooks/wp-cli.example.yml /path/to/project/wp-cli.yml
-    cp /path/to/wpgithooks/wp-cli.example.yml /path/to/project
-    cp /path/to/wpgithooks/wp-addons.example.php /path/to/project/.setup/wp-addons.php
-    cp /path/to/wpgithooks/wp-addons.example.php /path/to/project/.setup
-    cp /path/to/wpgithooks/cleanup.example.sh /path/to/project/.setup/cleanup.sh
-    cp /path/to/wpgithooks/cleanup.example.sh /path/to/project/.setup
+    cp /path/to/wpgithooks/wp-cli.yml.example /path/to/project/wp-cli.yml
+    cp /path/to/wpgithooks/wp-cli.yml.example /path/to/project
+    cp /path/to/wpgithooks/wp-addons.php.example /path/to/project/.setup/wp-addons.php
+    cp /path/to/wpgithooks/wp-addons.php.example /path/to/project/.setup
+    cp /path/to/wpgithooks/cleanup.sh.example /path/to/project/.setup/cleanup.sh
+    cp /path/to/wpgithooks/cleanup.sh.example /path/to/project/.setup
 
 ## How to Use
 

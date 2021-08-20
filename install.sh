@@ -46,9 +46,9 @@ fi
 
 # Set the wp-addons.php file if there is not one already
 if [ ! -e "$WORDPRESS_SETUP_DIR"/wp-addons.php ]; then
-    EXAMPLE_ADDONS="$WORDPRESS_SETUP_DIR"/wp-addons.example.php
+    EXAMPLE_ADDONS="$WORDPRESS_SETUP_DIR"/wp-addons.php.example
     if [ ! -e "$EXAMPLE_ADDONS" ]; then
-        echo -e "$RED"Please add a wp-addons.example.php to your uploads repo or a wp-addons.php to your uploads working directory"$ENDCOLOR"
+        echo -e "$RED"Please add a wp-addons.php.example to your uploads repo or a wp-addons.php to your uploads working directory"$ENDCOLOR"
         exit 1
     fi
 
